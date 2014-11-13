@@ -89,9 +89,9 @@ function string2pin(str) {
 //   p4 = string2pin("13-11-2014 04.10 @ 49.00286737829447,8.413012605160475 / 15")
 // ]
 
-var input = "20-08-2014 20.36 @ 49.00264190509915,8.413744512945414 / 25\n\
-11-10-2014 15.00 @ 49.00264190509915,8.413744512945414 / 25\n\
-11-10-2014 23.50 @ 53.65919932723045,9.830957371741533 / 25";
+// begin preproc.py puts code here
+var input = "%%MARKERFORDATA%%";
+// end preproc.py puts code here
 
 var lines = input.split("\n");
 lines.map(string2pin).map(plot);
