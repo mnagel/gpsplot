@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaflet Quick Start Guide Example</title>
+  <meta charset="utf-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+</head>
+<body>
+
+  <div id="map" style="width: 800px; height: 1400px"></div>
+
+  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script>
+
+    var map = L.map('map').setView([49.00251, 8.41327], 12);
+
+    L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+        'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+      id: 'examples.map-i875mjb7'
+    }).addTo(map);
+
+
+    L.marker([49.00251, 8.41327]).addTo(map)
+      .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+
+    L.circle([49.00251, 8.41327], 500, {
+      color: 'red',
+      fillColor: '#f03',
+      fillOpacity: 0.5
+    }).addTo(map).bindPopup("I am a circle.");
+
+    L.polygon([
+      [49.00, 8.475],
+      [50.00, 9.475],
+      [51.00, 7.475]
+    ]).addTo(map).bindPopup("I am a polygon.");
+
+
+    var popup = L.popup();
+
+    function onMapClick(e) {
+      popup
+        .setLatLng(e.latlng)
+        .setContent("You clicked the map at " + e.latlng.toString())
+        .openOn(map);
+    }
+
+    map.on('click', onMapClick);
+
+
+function pin(lat, lon, date, comment) {
+    this.lat = lat;
+    this.lon = lon;
+    this.date = date;
+    this.comment = comment;
+}
+
+var p1 = new pin(49.008891745470464,8.440543301403522,new Date(1995, 11, 17, 3, 24, 0), "p1");
+var p2 = new pin(49.108891745470464,8.140543301403522,new Date(1995, 11, 17, 3, 25, 0), "p2");
+
+function plot(what) {
+  L.marker([what.lat, what.lon]).addTo(map)
+      .bindPopup(what.date + " " + what.comment).openPopup();
+}
+
+function plotArray(arr) {
+  arr.map(plot);
+}
+
+function string2pin(str) {
+  var myRegexp = /(..)-(..)-(....) (..).(..) @ ([\.0-9]+),([\.0-9]+)...([0-9]+)/;
+  var match = myRegexp.exec(str);
+  var result = new pin(match[6],match[7],new Date(match[3], match[2], match[1], match[4], match[5], 0), match[8]);
+  return result;
+}
+
+
+// var pins =
+// [ // p1,
+//   // p2,
+//   new pin(49.208891745470464,8.000543301403522,new Date(1995, 11, 17, 3, 25, 0), "p3"),
+//   p4 = string2pin("13-11-2014 04.10 @ 49.00286737829447,8.413012605160475 / 15")
+// ]
+
+var input = "20-08-2014 20.36 @ 49.00264190509915,8.413744512945414 / 25\n\
+11-10-2014 15.00 @ 49.00264190509915,8.413744512945414 / 25\n\
+11-10-2014 23.50 @ 53.65919932723045,9.830957371741533 / 25";
+
+var lines = input.split("\n");
+lines.map(string2pin).map(plot);
+
+//plot(p1);
+//plot(p2);
+
+//plotArray(pins);
+
+  </script>
+
+</body>
+</html>
