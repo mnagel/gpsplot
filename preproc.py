@@ -41,7 +41,10 @@ class ExifImage(object):
 
     def __init__(self, fn):
         self.fn = fn
-        self._exif = Image.open(fn)._getexif()
+        try:
+            self._exif = Image.open(fn)._getexif()
+        except:
+        	self._exif = None
 
     def has_exif(self):
         return self._exif is not None
