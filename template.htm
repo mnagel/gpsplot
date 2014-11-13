@@ -98,7 +98,14 @@ function plot(what) {
 
 plot(p1);
 
-</script>
+var input = [
+// begin preproc.py puts code here
+%%MARKERFORDATA%%
+// end preproc.py puts code here
+];
 
+input.map(plot);
+
+</script>
 </body>
 </html>
