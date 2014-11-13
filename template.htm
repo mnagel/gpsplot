@@ -9,10 +9,38 @@
 
    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
    <link rel="icon" href="assets/favicon.ico">
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 </head>
 <body>
 
-  <div id="map" style="width: 800px; height: 1400px"></div>
+  <div class="container">
+    <div class="alert alert-info">
+      <table >
+        <tr>
+          <td class="span10"><h1>your pictures and their origin / <a href="https://github.com/mnagel/gpsplot">GPSplot</a></h1> </td>
+          <td class="span2"></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="container">
+      <div class="alert alert-info">
+        <div id="map" style="width: 800px; height: 800px"></div>
+    </div>
+  </div>
+
+  
 
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
   <script>
