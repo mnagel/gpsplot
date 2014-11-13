@@ -73,13 +73,6 @@ function Pin(lat, lon, aux) {
     }
 }
 
-var p1 = new Pin(49.008891745470464, 8.440543301403522, {
-        date: new Date(1995, 11, 17, 3, 24, 0),
-        comment: 'p1',
-	url: 'kuh.jpg',
-        thumbnail: new Thumbnail(24, 50, 'kuh-thumbnail.jpg')
-    });
-
 function onMarkerClick(e) {
     var marker = e.target;
     var what = marker.pin;
@@ -95,8 +88,6 @@ function plot(what) {
   marker.addTo(map);
   marker.on('click', onMarkerClick);
 }
-
-plot(p1);
 
 var input = [
 // begin preproc.py puts code here
