@@ -3,52 +3,93 @@
 import argparse
 import re
 import sys
-
+import os
 import Image
  
 # begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
-# Magic EXIF number.
-GPS = 34853
-
 def degrees(dms):
-  '''Return decimal degrees from degree, minute, second tuple.
-  
-  Each item in the tuple is itself a two-item tuple of a
-  numerator and a denominator.'''
-  
-  deg, min, sec = dms
-  deg = float(deg[0])/deg[1]
-  min = float(min[0])/min[1]
-  sec = float(sec[0])/sec[1]
-  return deg + min/60 + sec/3600
+    '''Return decimal degrees from degree, minute, second tuple.
+
+    Each item in the tuple is itself a two-item tuple of a
+    numerator and a denominator.'''
+
+    deg, min, sec = dms
+    deg = float(deg[0])/deg[1]
+    min = float(min[0])/min[1]
+    sec = float(sec[0])/sec[1]
+    return deg + min/60 + sec/3600
 
 def coord_pair(gps):
-  'Return the latitude, longitude pair from GPS EXIF data.'
-  
-  # Magic GPS EXIF numbers.
-  LATREF = 1; LAT = 2
-  LONGREF = 3; LONG = 4
-  
-  lat = degrees(gps[LAT])
-  if gps[LATREF] == 'S':
-      lat = -lat
-  long = degrees(gps[LONG])
-  if gps[LONGREF] == 'W':
-      long = -long
-  return (lat, long)
+    'Return the latitude, longitude pair from GPS EXIF data.'
 
-def get_exif(fn):
-	try:
-	  # Open the photo file and read the EXIF data.
-	  exif = Image.open(fn)._getexif()
-	  gps = exif[GPS]
-	  return coord_pair(gps)
-	except KeyError:
-	  print "No GPS data for %s" % fn
-	  sys.exit(1)
+# Magic GPS EXIF numbers.
+    LATREF = 1; LAT = 2
+    LONGREF = 3; LONG = 4
+
+    lat = degrees(gps[LAT])
+    if gps[LATREF] == 'S':
+        lat = -lat
+    lon = degrees(gps[LONG])
+    if gps[LONGREF] == 'W':
+        lon = -lon
+    return (lat, lon)
 # end http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
 
-print get_exif("data/img/iphone060.jpg")
+class ExifImage(object):
+    # Magic EXIF number.
+    _GPS = 34853
+
+    def __init__(self, fn):
+        self.fn = fn
+        self._exif = Image.open(fn)._getexif()
+
+    def has_exif(self):
+        return self._exif is not None
+
+    def has_gps(self):
+        return self.has_exif() and self._raw_gps() is not None
+
+    def _raw_gps(self):
+        return self._exif.get(self._GPS, None)
+
+    def gps_coords(self):
+        return coord_pair(self._raw_gps())
+
+def exif_image_to_line(d):
+    gps_coords = exif_image.gps_coords()
+    return """
+new Pin(%s, %s, {
+    date      : %s,
+    comment   : '%s',
+    url       : '%s',
+    thumbnail : new Thumbnail(%s, %s, '%s')
+})
+
+""" % (
+        gps_coords[0],
+        gps_coords[1],
+        "new Date(%s, %s, %s, %s, %s, 0)" % (2011, 12, 03, 14, 30),
+        "comment",
+        exif_image.fn,
+        80,
+        60,
+        exif_image.fn,
+    )
+
+def find_images(basedir):
+    datanames = []
+    for subdir, dirs, files in os.walk(basedir):
+        for file in files:
+            datanames.append(os.path.join(subdir, file))
+    return datanames
+
+def fill_template(outfile, template, data):
+    with open (template, "r") as myfile:
+        template = myfile.read()
+    result = template.replace('%%MARKERFORDATA%%', ',\n'.join(data))
+    with open(outfile, "w") as text_file:
+        text_file.write(result)
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--template', default='template.htm', type=str)
@@ -58,50 +99,14 @@ parser.add_argument('--length', default=100, type=int)
 
 options = parser.parse_args()    
 
-with open (options.template, "r") as myfile:
-    template=myfile.read() # .replace('\n', '')
 
+lines = []
+for dataname in find_images(options.datafile):
+    exif_image = ExifImage(dataname)
+    if not exif_image.has_gps():
+        print >>sys.stderr, "notice: image {0} has no EXIF and/or GPS data".format(
+                exif_image.fn)
+        continue
+    lines.append(exif_image_to_line(exif_image))
 
-import os
-
-datanames = []
-for subdir, dirs, files in os.walk(options.datafile):
-    for file in files:
-        datanames.append(os.path.join(subdir, file))
-
-def dataname2dataob(dn):
-	result = {
-		"file" 	: dn,
-		"lat"	: get_exif(dn)[0],
-		"lon"	: get_exif(dn)[1],
-	}
-	return result
-
-def dataob2line(d):
-	return """
-new Pin(%s, %s, {
-        date      : %s,
-        comment   : '%s',
-        url       : '%s',
-        thumbnail : new Thumbnail(%s, %s, '%s')
-    })
-
-""" % (
-		d["lat"],
-		d["lon"],
-		"new Date(%s, %s, %s, %s, %s, 0)" % (2011, 12, 03, 14, 30),
-		"comment",
-		d["file"],
-		80,
-		60,
-		d["file"],
-	)
-
-dataobs = map(dataname2dataob, datanames)
-lines = map(dataob2line, dataobs)
-
-# result = re.sub('%%MARKERFORDATA%%', '\n'.join(data), template)
-result = template.replace('%%MARKERFORDATA%%', ',\n'.join(lines))
-
-with open(options.outfile, "w") as text_file:
-    text_file.write(result)
+fill_template(outfile=options.outfile, template=options.template, data=lines)
