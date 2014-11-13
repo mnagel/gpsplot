@@ -78,15 +78,23 @@ def dataname2dataob(dn):
 	return result
 
 def dataob2line(d):
-	return 'new pin(%s, %s, %s, %s, %s, "%s", "%s", "%s")' % (
+	return """
+new Pin(%s, %s, {
+        date      : %s,
+        comment   : '%s',
+        url       : '%s',
+        thumbnail : new Thumbnail(%s, %s, '%s')
+    })
+
+""" % (
 		d["lat"],
 		d["lon"],
 		"new Date(%s, %s, %s, %s, %s, 0)" % (2011, 12, 03, 14, 30),
+		"comment",
+		d["file"],
 		800,
 		600,
 		d["file"],
-		d["file"],
-		"comment"
 	)
 
 dataobs = map(dataname2dataob, datanames)
