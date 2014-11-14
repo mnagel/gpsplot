@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import argparse
-import re
 import sys
 import os
 import Image
@@ -98,7 +97,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--template', default='template.htm', type=str)
 parser.add_argument('--datafile', default='data/img', type=str)
 parser.add_argument('--outfile', default='index.htm', type=str)
-parser.add_argument('--length', default=100, type=int)
 
 options = parser.parse_args()    
 
