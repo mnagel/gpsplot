@@ -102,11 +102,14 @@ options = parser.parse_args()
 
 
 lines = []
-for dataname in find_images(options.datafile):
-    exif_image = ExifImage(dataname)
+imagepaths = find_images(options.datafile)
+for imagepath in imagepaths:
+    exif_image = ExifImage(imagepath)
     if not exif_image.has_gps():
         print >>sys.stderr, "notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn)
         continue
     lines.append(exif_image_to_line(exif_image))
+
+print "%d/%d images without usable exif data" % (len(imagepaths) - len (lines), len(imagepaths))
 
 fill_template(outfile=options.outfile, template=options.template, data=lines)
