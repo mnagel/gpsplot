@@ -91,10 +91,11 @@ def find_images(basedir):
             datanames.append(os.path.join(subdir, file))
     return datanames
 
-def fill_template(outfile, template, data):
+def fill_template(outfile, template, data, debug):
     with open (template, "r") as myfile:
         template = myfile.read()
     result = template.replace('%%MARKERFORDATA%%', ',\n'.join(data))
+    result = result.replace('%%UNCOMMENT-IN-DEBUG%%', '//' if debug else '')
     with open(outfile, "w") as text_file:
         text_file.write(result)
 
@@ -103,6 +104,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--template', default='template.htm', type=str)
 parser.add_argument('--datafile', default='data/img', type=str)
 parser.add_argument('--outfile', default='index.htm', type=str)
+parser.add_argument('--debug', default=False, action="store_true")
 
 options = parser.parse_args()    
 
@@ -118,4 +120,4 @@ for imagepath in imagepaths:
 
 print "%d/%d images without usable exif data" % (len(imagepaths) - len (lines), len(imagepaths))
 
-fill_template(outfile=options.outfile, template=options.template, data=lines)
+fill_template(outfile=options.outfile, template=options.template, data=lines, debug=options.debug)
