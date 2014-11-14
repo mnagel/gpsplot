@@ -71,7 +71,7 @@ new Pin(%s, %s, {
         gps_coords[0],
         gps_coords[1],
         "new Date(%s, %s, %s, %s, %s, 0)" % (2011, 12, 03, 14, 30),
-        "comment",
+        "", # comment
         input_image.fn,
         160,
         120,
