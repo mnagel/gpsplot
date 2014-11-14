@@ -49,7 +49,13 @@ class ExifImage(object):
         return self._exif is not None
 
     def has_gps(self):
-        return self.has_exif() and self._raw_gps() is not None
+        try:
+            if (not self.has_exif()) or (self._raw_gps() is None):
+                return False
+            x, y = self.gps_coords() # try to actually access them, might fail
+            return True
+        except:
+            return False
 
     def _raw_gps(self):
         return self._exif.get(self._GPS, None)
