@@ -1,91 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>GPSplot: "Your pictures and their origin."</title>
   <meta charset="utf-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-   <link rel="icon" href="assets/favicon.ico">
+  <title>GPSplot: "Your pictures and their origin."</title>
 
-<style>
-  body { margin:0; padding:0; }
-  #map { position:absolute; top:0; bottom:0; width:100%; }
-</style>
-
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+  <link rel="icon" href="assets/favicon.ico">
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+  </style>
 </head>
 <body>
-        <div id="map"></div>
+
+  <div id="map"></div>
 
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
   <script>
 
-    var map = L.map('map').setView([49.00251, 8.41327], 12);
+var map = L.map('map').setView([49.00251, 8.41327], 12);
 
-    L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '<h1><a href="https://github.com/mnagel/gpsplot">GPSplot: "Your pictures and their origin."</a></h1>' +
-      'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-        'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-      id: 'examples.map-i875mjb7'
-    }).addTo(map);
-
+L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '<h1><a href="https://github.com/mnagel/gpsplot">GPSplot: "Your pictures and their origin."</a></h1>' +
+  'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+  '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+  'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+  id: 'examples.map-i875mjb7'
+}).addTo(map);
 
 function Thumbnail(height, width, url) {
-    this.height = height;
-    this.width = width;
-    this.url = url;
+  this.height = height;
+  this.width = width;
+  this.url = url;
 
-    this.createElement = function() {
-	var thumbnail = document.createElement("img");
-	thumbnail.setAttribute('src', this.url);
-	thumbnail.setAttribute('height', this.height);
-	thumbnail.setAttribute('width', this.width);
-	return thumbnail;
-    }
+  this.createElement = function() {
+    var thumbnail = document.createElement("img");
+    thumbnail.setAttribute('src', this.url);
+    thumbnail.setAttribute('height', this.height);
+    thumbnail.setAttribute('width', this.width);
+    return thumbnail;
+  }
 }
 
 function Pin(lat, lon, aux) {
-    this.lat = lat;
-    this.lon = lon;
-    this.date = aux['date'];
-    this.comment = aux['comment'];
-    this.url = aux['url'];
-    this.thumbnail = aux['thumbnail'];
+  this.lat = lat;
+  this.lon = lon;
+  this.date = aux['date'];
+  this.comment = aux['comment'];
+  this.url = aux['url'];
+  this.thumbnail = aux['thumbnail'];
 
-    this.createPopup = function(marker) {
-	var box = document.createElement('div');
-	box.innerHTML = this.date + " " + this.comment;
-	if (this.url) {
-	    box.appendChild(document.createElement('p'));
-
-	    var link = document.createElement('a');
-	    link.setAttribute('href', this.url);
-	    if (this.thumbnail) {
-		link.appendChild(this.thumbnail.createElement());
-	    } else {
-		link.innerHTML = this.url;
-	    }
-	    box.appendChild(link);
-	} else {
-	    if (this.thumbnail) {
-		box.appendChild(document.createElement('p'));
-		box.appendChild(this.thumbnail.createElement());
-	    }
-	}
-	return marker.bindPopup(box);
+  this.createPopup = function(marker) {
+    var box = document.createElement('div');
+    box.innerHTML = this.date + " " + this.comment;
+    if (this.url) {
+      box.appendChild(document.createElement('p'));
+      var link = document.createElement('a');
+      link.setAttribute('href', this.url);
+      if (this.thumbnail) {
+        link.appendChild(this.thumbnail.createElement());
+      } else {
+        link.innerHTML = this.url;
+      }
+      box.appendChild(link);
+    } else {
+      if (this.thumbnail) {
+        box.appendChild(document.createElement('p'));
+        box.appendChild(this.thumbnail.createElement());
+      }
     }
+    return marker.bindPopup(box);
+  }
 }
 
 function onMarkerClick(e) {
-    var marker = e.target;
-    var what = marker.pin;
-    if (!what.hasPopup) {
-	what.hasPopup = true;
-        what.createPopup(marker).openPopup();
-    }
+  var marker = e.target;
+  var what = marker.pin;
+  if (!what.hasPopup) {
+    what.hasPopup = true;
+    what.createPopup(marker).openPopup();
+  }
 }
 
 function plot(what) {
@@ -103,6 +100,7 @@ var input = [
 
 input.map(plot);
 
-</script>
+  </script>
+
 </body>
 </html>
