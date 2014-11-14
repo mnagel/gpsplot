@@ -105,8 +105,7 @@ lines = []
 for dataname in find_images(options.datafile):
     exif_image = ExifImage(dataname)
     if not exif_image.has_gps():
-        print >>sys.stderr, "notice: image {0} has no EXIF and/or GPS data".format(
-                exif_image.fn)
+        print >>sys.stderr, "notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn)
         continue
     lines.append(exif_image_to_line(exif_image))
 
