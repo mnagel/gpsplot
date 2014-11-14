@@ -188,6 +188,18 @@ var input = [
 
 input.map(plot);
 
+%%UNCOMMENT-IN-DEBUG%% /*
+// click in nowhere -> show some info
+var popup = L.popup();
+function onMapClick(e) {
+    popup
+        .setLatLng(e.latlng)
+        .setContent("You clicked the map at " + e.latlng.toString())
+        .openOn(map);
+}
+map.on('click', onMapClick);
+%%UNCOMMENT-IN-DEBUG%% */
+
   </script>
 
 </body>
