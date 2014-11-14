@@ -58,8 +58,8 @@ class ExifImage(object):
     def gps_coords(self):
         return coord_pair(self._raw_gps())
 
-def exif_image_to_line(d):
-    gps_coords = exif_image.gps_coords()
+def exif_image_to_line(input_image):
+    gps_coords = input_image.gps_coords()
     return """
 new Pin(%s, %s, {
     date      : %s,
@@ -73,10 +73,10 @@ new Pin(%s, %s, {
         gps_coords[1],
         "new Date(%s, %s, %s, %s, %s, 0)" % (2011, 12, 03, 14, 30),
         "comment",
-        exif_image.fn,
-        80,
-        60,
-        exif_image.fn,
+        input_image.fn,
+        160,
+        120,
+        input_image.fn,
     )
 
 def find_images(basedir):
