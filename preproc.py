@@ -63,8 +63,13 @@ class ExifImage(object):
     def gps_coords(self):
         return coord_pair(self._raw_gps())
 
+    def size(self):
+        im = Image.open(self.fn)
+        return im.size # w, h
+
 def exif_image_to_line(input_image):
     gps_coords = input_image.gps_coords()
+    size = input_image.size()
     return """
 new Pin(%s, %s, {
     date      : %s,
@@ -79,8 +84,8 @@ new Pin(%s, %s, {
         "new Date(%s, %s, %s, %s, %s, 0)" % (2011, 12, 03, 14, 30),
         "", # comment
         input_image.fn,
-        160,
-        120,
+        size[1], # h
+        size[0], # w
         input_image.fn,
     )
 
