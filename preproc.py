@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import argparse
+import errno
 import os
 import sys
 import time
@@ -80,6 +81,14 @@ class ExifImage(object):
         im = Image.open(self.fn)
         return im.size # w, h
 
+    def create_thumbnail(self, dir, size):
+        im = Image.open(self.fn)
+        im.thumbnail((size, size), Image.ANTIALIAS)
+        im.save(self.get_thumbpath(dir), 'JPEG', quality=98)
+
+    def get_thumbpath(self, dir):
+        return dir + '/' + os.path.basename(self.fn) + '.thumb.jpg'
+
 def exif_image_to_line(input_image):
     gps_coords = input_image.gps_coords()
     size = input_image.size()
@@ -99,7 +108,7 @@ new Pin(%s, %s, {
         input_image.fn,
         size[1], # h
         size[0], # w
-        input_image.fn,
+        input_image.get_thumbpath(options.thumbdir), # bad bad scope creep
     )
 
 def find_images(basedir):
@@ -117,15 +126,26 @@ def fill_template(outfile, template, data, debug):
     with open(outfile, "w") as text_file:
         text_file.write(result)
 
+def mkdir_p(path):
+    # http://stackoverflow.com/a/600612/2536029
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--template', default='template.htm', type=str)
 parser.add_argument('--datafile', default='data/img', type=str)
+parser.add_argument('--thumbdir', default='data/thumbs', type=str)
+parser.add_argument('--thumbsize', default=160, type=int)
 parser.add_argument('--outfile', default='index.htm', type=str)
 parser.add_argument('--debug', default=False, action="store_true")
 
-options = parser.parse_args()    
+options = parser.parse_args()
 
+mkdir_p(options.thumbdir)
 
 lines = []
 imagepaths = find_images(options.datafile)
@@ -135,6 +155,7 @@ for imagepath in imagepaths:
         print >>sys.stderr, "notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn)
         continue
     lines.append(exif_image_to_line(exif_image))
+    exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
 
 print "%d/%d images without usable exif data" % (len(imagepaths) - len (lines), len(imagepaths))
 
