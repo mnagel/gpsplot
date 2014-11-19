@@ -108,6 +108,8 @@
 
   <script>
 
+var THUMBSIZE = 160;
+
 var map = L.map('map').setView([50.50, 10], 7);
 
 L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
@@ -119,6 +121,12 @@ L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
   id: 'examples.map-i875mjb7'
 }).addTo(map);
 
+function scaleIntoBox(x, y, boxsize) {
+  var scale = boxsize / Math.max(x, y);
+  scale = Math.min(scale, 1); // dont go > 1 (dont enlarge)
+  return [x*scale, y*scale];
+}
+
 function Thumbnail(height, width, url) {
   this.height = height;
   this.width = width;
@@ -126,9 +134,10 @@ function Thumbnail(height, width, url) {
 
   this.createElement = function() {
     var thumbnail = document.createElement("img");
+    sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
     thumbnail.setAttribute('src', this.url);
-    thumbnail.setAttribute('height', this.height);
-    thumbnail.setAttribute('width', this.width);
+    thumbnail.setAttribute('height', sizes[0]);
+    thumbnail.setAttribute('width', sizes[1]);
     return thumbnail;
   }
 }
