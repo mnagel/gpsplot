@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 
 import argparse
-import sys
 import os
+import sys
+import time
 import Image
  
 # begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
@@ -37,6 +38,7 @@ def coord_pair(gps):
 class ExifImage(object):
     # Magic EXIF number.
     _GPS = 34853
+    _DATE = 36867
 
     def __init__(self, fn):
         self.fn = fn
@@ -56,6 +58,17 @@ class ExifImage(object):
             return True
         except:
             return False
+
+#    def has_date(self):
+#        return self.get_date() is None
+
+    def get_date(self):
+        inp = self._exif.get(self._DATE, None)
+        # print result
+        date = time.strptime(inp, '%Y:%m:%d %H:%M:%S')
+        #print str(date)
+        #print time.strftime("new Date(%Y, %m, %d, %H, %M, %S)", date)
+        return date
 
     def _raw_gps(self):
         return self._exif.get(self._GPS, None)
@@ -81,7 +94,7 @@ new Pin(%s, %s, {
 """ % (
         gps_coords[0],
         gps_coords[1],
-        "new Date(%s, %s, %s, %s, %s, 0)" % (2011, 12, 03, 14, 30),
+        time.strftime("new Date(%Y, %m, %d, %H, %M, %S)", input_image.get_date()),
         "", # comment
         input_image.fn,
         size[1], # h
