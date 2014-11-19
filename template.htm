@@ -157,6 +157,7 @@ function Pin(lat, lon, aux) {
       box.appendChild(document.createElement('p'));
       var link = document.createElement('a');
       link.setAttribute('href', this.url);
+      link.setAttribute('target', '_blank');
       if (this.thumbnail) {
         link.appendChild(this.thumbnail.createElement());
       } else {
