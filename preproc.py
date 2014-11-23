@@ -164,6 +164,6 @@ for imagepath in imagepaths:
     if not options.skipthumbs:
         exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
 
-print "%d/%d images without usable exif data" % (len(imagepaths) - len (lines), len(imagepaths))
+print "%d/%d images with usable exif data. %d without usable exif data." % (len(lines), len(imagepaths), len(imagepaths) - len (lines))
 
 fill_template(outfile=options.outfile, template=options.template, data=lines, debug=options.debug)
