@@ -82,11 +82,16 @@ class ExifImage(object):
         return im.size # w, h
 
     def create_thumbnail(self, dir, size):
+        if self.get_thumbpath(dir) == self.fn:
+            print >>sys.stderr, "skipping as you are about to overwrite your input data at %s" % self.fn
+            return
         im = Image.open(self.fn)
         im.thumbnail((size, size), Image.ANTIALIAS)
         im.save(self.get_thumbpath(dir), 'JPEG', quality=98)
 
     def get_thumbpath(self, dir):
+        if options.skipthumbs: # bad bad scope creep
+            return self.fn
         return dir + '/' + os.path.basename(self.fn) + '.thumb.jpg'
 
 def exif_image_to_line(input_image):
@@ -138,6 +143,7 @@ def mkdir_p(path):
 parser = argparse.ArgumentParser()
 parser.add_argument('--template', default='template.htm', type=str)
 parser.add_argument('--datafile', default='data/img', type=str)
+parser.add_argument('--skipthumbs', default=False, action="store_true")
 parser.add_argument('--thumbdir', default='data/thumbs', type=str)
 parser.add_argument('--thumbsize', default=160, type=int)
 parser.add_argument('--outfile', default='index.htm', type=str)
@@ -155,7 +161,8 @@ for imagepath in imagepaths:
         print >>sys.stderr, "notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn)
         continue
     lines.append(exif_image_to_line(exif_image))
-    exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
+    if not options.skipthumbs:
+        exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
 
 print "%d/%d images without usable exif data" % (len(imagepaths) - len (lines), len(imagepaths))
 
