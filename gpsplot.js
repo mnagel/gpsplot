@@ -57,12 +57,15 @@ function Pin(lat, lon, aux) {
   this.comment = aux['comment'];
   this.url = aux['url'];
   this.thumbnail = aux['thumbnail'];
+  this.childs = [];
 
-  this.createPopup = function(marker) {
+  this.createBox = function() {
     var box = document.createElement('div');
-    box.innerHTML = "Photo taken on " + this.date.format('Y-m-d H:i:s') + "<br />" + this.comment;
+   // box.innerHTML = "Photo taken on " + this.date.format('Y-m-d H:i:s')
+   // + "<br />" 
+   // + this.comment;
     if (this.url) {
-      box.appendChild(document.createElement('p'));
+    //  box.appendChild(document.createElement('p'));
       var link = document.createElement('a');
       link.setAttribute('href', this.url);
       link.setAttribute('target', '_blank');
@@ -74,11 +77,26 @@ function Pin(lat, lon, aux) {
       box.appendChild(link);
     } else {
       if (this.thumbnail) {
-        box.appendChild(document.createElement('p'));
+//        box.appendChild(document.createElement('p'));
         box.appendChild(this.thumbnail.createElement());
       }
     }
-    return marker.bindPopup(box);
+    return box;
+  }
+
+  this.createPopup = function(marker) {
+    var master_box = document.createElement('div');
+    master_box.className = 'thumbnailbox';
+    master_box.appendChild(this.createBox());
+    this.childs.map(function(child) {
+        master_box.appendChild(child.createBox());
+    });
+    return marker.bindPopup(master_box);
+  }
+
+  this.mergePin = function(child_pin) {
+    this.childs.push(child_pin);
+    map.removeLayer(child_pin.marker);
   }
 }
 
@@ -91,11 +109,12 @@ function onMarkerClick(e) {
   }
 }
 
-function plot(what) {
-  var marker = L.marker([what.lat, what.lon]);
-  marker.pin = what;
+function plot(pin) {
+  var marker = L.marker([pin.lat, pin.lon]);
+  marker.pin = pin;
   marker.addTo(map);
   marker.on('click', onMarkerClick);
+  pin.marker = marker;
 }
 
 function activateDebug() {
@@ -120,7 +139,13 @@ function dto_to_pin(dto) {
               });
 }
 
+var pins;
 function main(pin_dtos) {
-    var pins = pin_dtos.map(dto_to_pin);
+    pins = pin_dtos.map(dto_to_pin);
     pins.map(plot);
+
+    parent_pin = pins[0];
+    for (var i = 1; i < pins.length; i++) {
+        parent_pin.mergePin(pins[i]);
+    }
 }
