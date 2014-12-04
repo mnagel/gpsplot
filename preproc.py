@@ -1,4 +1,22 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
+# Tool to process EXIF-tagged images into a nice HTML page with geo-location
+# information.
+#
+# Copyright (C) 2015  Michael Nagel <michael.nagel@devzero.de>
+# Copyright (C) 2015  Fabian Knittel <fabian.knittel@lettink.de>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
 import errno
@@ -6,7 +24,7 @@ import os
 import sys
 import time
 import Image
- 
+
 # begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
 def degrees(dms):
     '''Return decimal degrees from degree, minute, second tuple.
