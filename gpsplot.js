@@ -109,3 +109,18 @@ function activateDebug() {
   }
   map.on('click', onMapClick);
 }
+
+function dto_to_pin(dto) {
+    return new Pin(dto.gps.lat, dto.gps.lon, {
+                    date: new Date(dto.timestamp),
+                    comment: dto.comment,
+                    url: dto.image.url,
+                    thumbnail: new Thumbnail(dto.thumbnail.height,
+                            dto.thumbnail.width, dto.thumbnail.url)
+              });
+}
+
+function main(pin_dtos) {
+    var pins = pin_dtos.map(dto_to_pin);
+    pins.map(plot);
+}

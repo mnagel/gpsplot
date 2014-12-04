@@ -22,8 +22,9 @@ import argparse
 import errno
 import os
 import sys
-import time
+from datetime import datetime
 import Image
+import json
 
 # begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
 def degrees(dms):
@@ -83,11 +84,7 @@ class ExifImage(object):
 
     def get_date(self):
         inp = self._exif.get(self._DATE, None)
-        # print result
-        date = time.strptime(inp, '%Y:%m:%d %H:%M:%S')
-        #print str(date)
-        #print time.strftime("new Date(%Y, %m, %d, %H, %M, %S)", date)
-        return date
+        return datetime.strptime(inp, '%Y:%m:%d %H:%M:%S')
 
     def _raw_gps(self):
         return self._exif.get(self._GPS, None)
@@ -112,27 +109,25 @@ class ExifImage(object):
             return self.fn
         return dir + '/' + os.path.basename(self.fn) + '.thumb.jpg'
 
-def exif_image_to_line(input_image):
+def exif_image_to_dto(input_image):
     gps_coords = input_image.gps_coords()
     size = input_image.size()
-    return """
-new Pin(%s, %s, {
-    date      : %s,
-    comment   : '%s',
-    url       : '%s',
-    thumbnail : new Thumbnail(%s, %s, '%s')
-})
-
-""" % (
-        gps_coords[0],
-        gps_coords[1],
-        time.strftime("new Date(%Y, %m, %d, %H, %M, %S)", input_image.get_date()),
-        "", # comment
-        input_image.fn,
-        size[1], # h
-        size[0], # w
-        input_image.get_thumbpath(options.thumbdir), # bad bad scope creep
-    )
+    return {
+        'gps': {
+            'lat': gps_coords[0],
+            'lon': gps_coords[1],
+            },
+        'timestamp': input_image.get_date().isoformat(),
+        'comment': "",
+        'image': {
+            'url': input_image.fn,
+            },
+        'thumbnail': {
+            'url': input_image.get_thumbpath(options.thumbdir), # bad bad scope creep
+            'height': size[1],
+            'width': size[0],
+            },
+        }
 
 def find_images(basedir):
     datanames = []
@@ -141,12 +136,10 @@ def find_images(basedir):
             datanames.append(os.path.join(subdir, file))
     return datanames
 
-def fill_template(outfile, template, data):
-    with open (template, "r") as myfile:
-        template = myfile.read()
-    result = template.replace('%%MARKERFORDATA%%', ',\n'.join(data))
+def fill_template(outfile, dtos):
     with open(outfile, "w") as text_file:
-        text_file.write(result)
+        text_file.write("var pin_dtos = {0};".format(json.dumps(dtos, indent=4,
+            separators=(',', ': '))))
 
 def mkdir_p(path):
     # http://stackoverflow.com/a/600612/2536029
@@ -162,24 +155,23 @@ parser.add_argument('--datafile', default='data/img', type=str)
 parser.add_argument('--skipthumbs', default=False, action="store_true")
 parser.add_argument('--thumbdir', default='data/thumbs', type=str)
 parser.add_argument('--thumbsize', default=160, type=int)
-parser.add_argument('--template', default='pins.js.template', type=str)
 parser.add_argument('--outfile', default='pins.js', type=str)
 
 options = parser.parse_args()
 
 mkdir_p(options.thumbdir)
 
-lines = []
+dtos = []
 imagepaths = find_images(options.datafile)
 for imagepath in imagepaths:
     exif_image = ExifImage(imagepath)
     if not exif_image.has_gps():
         print >>sys.stderr, "notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn)
         continue
-    lines.append(exif_image_to_line(exif_image))
+    dtos.append(exif_image_to_dto(exif_image))
     if not options.skipthumbs:
         exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
 
-print "%d/%d images with usable exif data. %d without usable exif data." % (len(lines), len(imagepaths), len(imagepaths) - len (lines))
+print "%d/%d images with usable exif data. %d without usable exif data." % (len(dtos), len(imagepaths), len(imagepaths) - len (dtos))
 
-fill_template(outfile=options.outfile, template=options.template, data=lines)
+fill_template(outfile=options.outfile, dtos=dtos)
