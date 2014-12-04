@@ -1,41 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-<!--
-     Copyright (C) 2015  Michael Nagel <michael.nagel@devzero.de>
-     Copyright (C) 2015  Fabian Knittel <fabian.knittel@lettink.de>
+/*
+   Copyright (c) 2005 Jacob Wright
 
-     This program is free software: you can redistribute it and/or modify
-     it under the terms of the GNU General Public License as published by
-     the Free Software Foundation, either version 3 of the License, or
-     (at your option) any later version.
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
 
-     This program is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     GNU General Public License for more details.
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
 
-     You should have received a copy of the GNU General Public License
-     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  -->
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+   THE SOFTWARE.
+ */
+// Source: https://github.com/jacwright/date.format/
 
-  <title>GPSplot: "Your pictures and their origin."</title>
-
-  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-  <link rel="icon" href="assets/favicon.ico">
-  <style>
-    body { margin:0; padding:0; }
-    #map { position:absolute; top:0; bottom:0; width:100%; }
-  </style>
-</head>
-<body>
-
-  <div id="map"></div>
-
-  <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-  <script> // https://github.com/jacwright/date.format/blob/master/date.format.js
 (function() {
     
     Date.shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -121,113 +106,3 @@
     };
 
 }).call(this);
-  </script>
-
-  <script>
-
-var THUMBSIZE = 160;
-
-var map = L.map('map').setView([50.50, 10], 7);
-
-L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
-  maxZoom: 18,
-  attribution: '<h1><a href="https://github.com/mnagel/gpsplot">GPSplot: "Your pictures and their origin."</a></h1>' +
-  'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-  '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-  'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-  id: 'examples.map-i875mjb7'
-}).addTo(map);
-
-function scaleIntoBox(x, y, boxsize) {
-  var scale = boxsize / Math.max(x, y);
-  scale = Math.min(scale, 1); // dont go > 1 (dont enlarge)
-  return [x*scale, y*scale];
-}
-
-function Thumbnail(height, width, url) {
-  this.height = height;
-  this.width = width;
-  this.url = url;
-
-  this.createElement = function() {
-    var thumbnail = document.createElement("img");
-    sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
-    thumbnail.setAttribute('src', this.url);
-    thumbnail.setAttribute('height', sizes[0]);
-    thumbnail.setAttribute('width', sizes[1]);
-    return thumbnail;
-  }
-}
-
-function Pin(lat, lon, aux) {
-  this.lat = lat;
-  this.lon = lon;
-  this.date = aux['date'];
-  this.comment = aux['comment'];
-  this.url = aux['url'];
-  this.thumbnail = aux['thumbnail'];
-
-  this.createPopup = function(marker) {
-    var box = document.createElement('div');
-    box.innerHTML = "Photo taken on " + this.date.format('Y-m-d H:i:s') + "<br />" + this.comment;
-    if (this.url) {
-      box.appendChild(document.createElement('p'));
-      var link = document.createElement('a');
-      link.setAttribute('href', this.url);
-      link.setAttribute('target', '_blank');
-      if (this.thumbnail) {
-        link.appendChild(this.thumbnail.createElement());
-      } else {
-        link.innerHTML = this.url;
-      }
-      box.appendChild(link);
-    } else {
-      if (this.thumbnail) {
-        box.appendChild(document.createElement('p'));
-        box.appendChild(this.thumbnail.createElement());
-      }
-    }
-    return marker.bindPopup(box);
-  }
-}
-
-function onMarkerClick(e) {
-  var marker = e.target;
-  var what = marker.pin;
-  if (!what.hasPopup) {
-    what.hasPopup = true;
-    what.createPopup(marker).openPopup();
-  }
-}
-
-function plot(what) {
-  var marker = L.marker([what.lat, what.lon]);
-  marker.pin = what;
-  marker.addTo(map);
-  marker.on('click', onMarkerClick);
-}
-
-var input = [
-// begin preproc.py puts code here
-%%MARKERFORDATA%%
-// end preproc.py puts code here
-];
-
-input.map(plot);
-
-%%UNCOMMENT-IN-DEBUG%% /*
-// click in nowhere -> show some info
-var popup = L.popup();
-function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent("You clicked the map at " + e.latlng.toString())
-        .openOn(map);
-}
-map.on('click', onMapClick);
-%%UNCOMMENT-IN-DEBUG%% */
-
-  </script>
-
-</body>
-</html>

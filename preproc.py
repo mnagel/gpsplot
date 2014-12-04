@@ -141,11 +141,10 @@ def find_images(basedir):
             datanames.append(os.path.join(subdir, file))
     return datanames
 
-def fill_template(outfile, template, data, debug):
+def fill_template(outfile, template, data):
     with open (template, "r") as myfile:
         template = myfile.read()
     result = template.replace('%%MARKERFORDATA%%', ',\n'.join(data))
-    result = result.replace('%%UNCOMMENT-IN-DEBUG%%', '//' if debug else '')
     with open(outfile, "w") as text_file:
         text_file.write(result)
 
@@ -159,13 +158,12 @@ def mkdir_p(path):
         else: raise
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--template', default='template.htm', type=str)
 parser.add_argument('--datafile', default='data/img', type=str)
 parser.add_argument('--skipthumbs', default=False, action="store_true")
 parser.add_argument('--thumbdir', default='data/thumbs', type=str)
 parser.add_argument('--thumbsize', default=160, type=int)
-parser.add_argument('--outfile', default='index.htm', type=str)
-parser.add_argument('--debug', default=False, action="store_true")
+parser.add_argument('--template', default='pins.js.template', type=str)
+parser.add_argument('--outfile', default='pins.js', type=str)
 
 options = parser.parse_args()
 
@@ -184,4 +182,4 @@ for imagepath in imagepaths:
 
 print "%d/%d images with usable exif data. %d without usable exif data." % (len(lines), len(imagepaths), len(imagepaths) - len (lines))
 
-fill_template(outfile=options.outfile, template=options.template, data=lines, debug=options.debug)
+fill_template(outfile=options.outfile, template=options.template, data=lines)
