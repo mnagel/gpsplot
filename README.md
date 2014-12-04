@@ -33,4 +33,4 @@ Usage
 License
 =======
 
-TBD
+GNU GPL v3+
