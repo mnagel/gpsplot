@@ -127,4 +127,5 @@ function main(pin_dtos) {
       plotToLayer(pin, markers);
     });
     map.addLayer(markers);
+    map.fitBounds(markers.getBounds().pad(0.5));
 }
