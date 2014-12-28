@@ -91,11 +91,11 @@ function onMarkerClick(e) {
   }
 }
 
-function plot(what) {
+function plotToLayer(what, layer) {
   var marker = L.marker([what.lat, what.lon]);
   marker.pin = what;
-  marker.addTo(map);
   marker.on('click', onMarkerClick);
+  layer.addLayer(marker);
 }
 
 function activateDebug() {
@@ -122,5 +122,9 @@ function dto_to_pin(dto) {
 
 function main(pin_dtos) {
     var pins = pin_dtos.map(dto_to_pin);
-    pins.map(plot);
+    var markers = L.markerClusterGroup();
+    pins.forEach(function(pin) {
+      plotToLayer(pin, markers);
+    });
+    map.addLayer(markers);
 }
