@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
@@ -19,7 +18,8 @@ func redirect(target string) http.HandlerFunc {
 }
 
 func thumbnailer(w http.ResponseWriter, r *http.Request) {
-	fn := strings.TrimSuffix(r.URL.Path, ".thumb.jpg")
+	vars := mux.Vars(r)
+	fn := vars["filename"]
 
 	// TODO: canonicalize
 	f, err := os.Open("./data/img/" + fn)
@@ -47,7 +47,7 @@ func serveFile(r *mux.Router, path, fn string) {
 
 func main() {
 	r := mux.NewRouter()
-	r.PathPrefix("/data/thumbs/").Handler(http.StripPrefix("/data/thumbs/", http.HandlerFunc(thumbnailer)))
+	r.PathPrefix("/data/thumbs/{filename}.thumb.jpg").Handler(http.StripPrefix("/data/thumbs/", http.HandlerFunc(thumbnailer)))
 	r.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
 	files := map[string]string{
 		"/":           "index.html",
