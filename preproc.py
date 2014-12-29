@@ -172,7 +172,7 @@ def main():
     parser.add_argument('--skipthumbs', default=False, action="store_true")
     parser.add_argument('--thumbdir', default='data/thumbs', type=str)
     parser.add_argument('--thumbsize', default=160, type=int)
-    parser.add_argument('--outfile', default='pins.js', type=str)
+    parser.add_argument('--outfile', default='data/pins.js', type=str)
     parser.add_argument('--showatzero', default=False, action="store_true", help='Regard lat,log = 0,0 as valid coordinates')
     parser.add_argument('--allfileextensions', default=False, action="store_true", help='Scan all files for exif data, do not restrict to jpeg files')
     options = parser.parse_args()
