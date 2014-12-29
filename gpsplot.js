@@ -22,7 +22,7 @@ var map = L.map('map').setView([50.50, 10], 7);
 
 L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
   maxZoom: 18,
-  attribution: '<h1><a href="https://github.com/mnagel/gpsplot">GPSplot: "Your pictures and their origin."</a></h1>' +
+  attribution: '<a href="https://github.com/mnagel/gpsplot">GPSplot: "Your pictures and their origin."</a> | ' +
   'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
   '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
   'Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -46,6 +46,9 @@ function Thumbnail(height, width, url) {
     thumbnail.setAttribute('src', this.url);
     thumbnail.setAttribute('height', sizes[0]);
     thumbnail.setAttribute('width', sizes[1]);
+    var w = (160 - sizes[0]) / 2 + 3;
+    var h = (160 - sizes[1]) / 2 + 3;
+    thumbnail.setAttribute('style', 'margin: ' + w + 'px ' + h + 'px ' + w + 'px ' + h + 'px;');
     return thumbnail;
   }
 }
@@ -60,12 +63,14 @@ function Pin(lat, lon, aux) {
 
   this.createPopup = function(marker) {
     var box = document.createElement('div');
-    box.innerHTML = "Photo taken on " + this.date.format('Y-m-d H:i:s') + "<br />" + this.comment;
+    box.innerHTML = this.date.format('Y-m-d H:i:s') + "<br />" + this.comment;
     if (this.url) {
       box.appendChild(document.createElement('p'));
       var link = document.createElement('a');
       link.setAttribute('href', this.url);
       link.setAttribute('target', '_blank');
+      link.setAttribute('data-lightbox', 'any_group_name');
+      link.setAttribute('data-title', this.date.format('Y-m-d H:i:s'));
       if (this.thumbnail) {
         link.appendChild(this.thumbnail.createElement());
       } else {
@@ -89,6 +94,25 @@ function onMarkerClick(e) {
     what.hasPopup = true;
     what.createPopup(marker).openPopup();
   }
+}
+
+function onClusterClick(e) {
+  var box = document.createElement('div');
+  box.setAttribute('style', 'overflow: auto; max-height: 400px;');
+  e.layer.getAllChildMarkers().forEach(function(marker){
+    var link = document.createElement('a');
+    link.setAttribute('href', marker.pin.url);
+    link.setAttribute('target', '_blank');
+    link.setAttribute('data-lightbox', 'any_group_name');
+    link.setAttribute('data-title', marker.pin.date.format('Y-m-d H:i:s'));
+    if (marker.pin.thumbnail) {
+      link.appendChild(marker.pin.thumbnail.createElement());
+    } else {
+      link.innerHTML = marker.pin.url;
+    }
+    box.appendChild(link);
+  });
+  e.layer.bindPopup(box, {maxWidth: 520}).openPopup();
 }
 
 function plotToLayer(what, layer) {
@@ -122,10 +146,11 @@ function dto_to_pin(dto) {
 
 function main(pin_dtos) {
     var pins = pin_dtos.map(dto_to_pin);
-    var markers = L.markerClusterGroup();
+    var markers = L.markerClusterGroup({zoomToBoundsOnClick: false});
     pins.forEach(function(pin) {
       plotToLayer(pin, markers);
     });
+    markers.on('clusterclick', onClusterClick);
     map.addLayer(markers);
     map.fitBounds(markers.getBounds().pad(0.5));
 }
