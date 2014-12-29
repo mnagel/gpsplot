@@ -60,10 +60,8 @@ func thumbnailer(w http.ResponseWriter, r *http.Request) {
 func main() {
 	r := mux.NewRouter()
 	r.PathPrefix("/data/thumbs/").Handler(http.StripPrefix("/data/thumbs/", http.HandlerFunc(thumbnailer)))
-	for _, pn := range []string{"assets", "doc", "data", "vendor-libs"} {
-		serveDir(r, "/"+pn+"/", "./"+pn+"/")
-	}
-	for _, fn := range []string{"index.html", "pins.js", "gpsplot.js"} {
+	serveDir(r, "/data/", "./data/")
+	for _, fn := range []string{"index.html", "gpsplot.js"} {
 		serveFile(r, fn)
 	}
 	r.Path("/").HandlerFunc(redirect("/index.html"))
