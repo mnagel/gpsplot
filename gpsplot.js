@@ -35,20 +35,24 @@ function scaleIntoBox(x, y, boxsize) {
   return [x*scale, y*scale];
 }
 
-function Thumbnail(height, width, url) {
+function Thumbnail(height, width, url, caption) {
   this.height = height;
   this.width = width;
   this.url = url;
+  this.caption = caption;
 
   this.createElement = function() {
     var box = document.createElement("div");
-	box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; display: inline-block; margin: 3px; text-align: center; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center; ');
+	box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; position: relative; display: inline-block; margin: 3px; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center;');
     var thumbnail = document.createElement("img");
 	box.appendChild(thumbnail);
     sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
     thumbnail.setAttribute('src', this.url);
-    thumbnail.setAttribute('height', sizes[0]);
-    thumbnail.setAttribute('width', sizes[1]);
+	thumbnail.setAttribute('style', 'max-height: 100%; max-width: 100%; width: auto; height: auto; position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;');
+	var caption = document.createElement("span");
+	box.appendChild(caption);
+	caption.setAttribute('style', 'position: absolute; bottom: 0; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.4);');
+	caption.innerHTML = this.caption;
     return box;
   }
 }
@@ -140,7 +144,8 @@ function dto_to_pin(dto) {
                     comment: dto.comment,
                     url: dto.image.url,
                     thumbnail: new Thumbnail(dto.thumbnail.height,
-                            dto.thumbnail.width, dto.thumbnail.url)
+                            dto.thumbnail.width, dto.thumbnail.url,
+							new Date(dto.timestamp).format('Y-m-d H:i:s'))
               });
 }
 
