@@ -91,6 +91,9 @@ class ExifImage(object):
 
     def gps_coords(self):
         return coord_pair(self._raw_gps())
+    
+    def is_at_zero(self):
+        return self.gps_coords() == (0, 0)
 
     def size(self):
         im = Image.open(self.fn)
@@ -156,6 +159,7 @@ parser.add_argument('--skipthumbs', default=False, action="store_true")
 parser.add_argument('--thumbdir', default='data/thumbs', type=str)
 parser.add_argument('--thumbsize', default=160, type=int)
 parser.add_argument('--outfile', default='pins.js', type=str)
+parser.add_argument('--showatzero', default=False, action="store_true", help='Regard lat,log = 0,0 as valid coordinates')
 
 options = parser.parse_args()
 
@@ -168,6 +172,8 @@ for imagepath in imagepaths:
         exif_image = ExifImage(imagepath)
         if not exif_image.has_gps():
             print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
+            continue
+        if exif_image.is_at_zero() and not options.showatzero:
             continue
         dtos.append(exif_image_to_dto(exif_image))
         if not options.skipthumbs:
