@@ -82,7 +82,7 @@ class ExifImage(object):
             if not showatzero and self.is_at_zero():
                 return False
             return True
-        except Exception, e:
+        except Exception as e:
             print("{}: {}".format(self.fn, e))
             return False
 
