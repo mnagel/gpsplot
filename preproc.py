@@ -21,12 +21,13 @@
 from __future__ import print_function
 
 import argparse
-import errno
-import os
-import sys
 from datetime import datetime
+import errno
 from PIL import Image
 import json
+import os
+import re
+import sys
 
 # begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
 def degrees(dms):
@@ -137,10 +138,16 @@ def exif_image_to_dto(input_image, thumbdir):
             },
         }
 
-def find_images(basedir):
+def find_images(basedir, allfileextensions=False):
     datanames = []
+    re_jpeg = re.compile('^\.jpe?g$', re.IGNORECASE)
+    
     for subdir, dirs, files in os.walk(basedir):
         for file in files:
+            if not allfileextensions:
+                _, extension = os.path.splitext(file)
+                if not re_jpeg.match(extension):
+                    continue
             datanames.append(os.path.join(subdir, file))
     return datanames
 
@@ -166,13 +173,14 @@ def main():
     parser.add_argument('--thumbsize', default=160, type=int)
     parser.add_argument('--outfile', default='pins.js', type=str)
     parser.add_argument('--showatzero', default=False, action="store_true", help='Regard lat,log = 0,0 as valid coordinates')
-
+    parser.add_argument('--allfileextensions', default=False, action="store_true", help='Scan all files for exif data, do not restrict to jpeg files')
     options = parser.parse_args()
 
     mkdir_p(options.thumbdir)
 
     dtos = []
-    imagepaths = find_images(options.datafile)
+
+    imagepaths = find_images(options.datafile, allfileextensions=options.allfileextensions)
     for imagepath in imagepaths:
         try:
             exif_image = ExifImage(imagepath, options.skipthumbs)
