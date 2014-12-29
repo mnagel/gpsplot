@@ -82,7 +82,8 @@ class ExifImage(object):
             if not showatzero and self.is_at_zero():
                 return False
             return True
-        except:
+        except Exception, e:
+            print("{}: {}".format(self.fn, e))
             return False
 
 #    def has_date(self):
