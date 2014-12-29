@@ -62,8 +62,9 @@ class ExifImage(object):
     _GPS = 34853
     _DATE = 36867
 
-    def __init__(self, fn):
+    def __init__(self, fn, skipthumbs=False):
         self.fn = fn
+        self.skipthumbs = skipthumbs
         try:
             self._exif = Image.open(fn)._getexif()
         except:
@@ -112,11 +113,11 @@ class ExifImage(object):
         im.save(self.get_thumbpath(dir), 'JPEG', quality=98)
 
     def get_thumbpath(self, dir):
-        if options.skipthumbs: # bad bad scope creep
+        if self.skipthumbs: # bad bad scope creep
             return self.fn
         return dir + '/' + os.path.basename(self.fn) + '.thumb.jpg'
 
-def exif_image_to_dto(input_image):
+def exif_image_to_dto(input_image, thumbdir):
     gps_coords = input_image.gps_coords()
     size = input_image.size()
     return {
@@ -130,7 +131,7 @@ def exif_image_to_dto(input_image):
             'url': input_image.fn,
             },
         'thumbnail': {
-            'url': input_image.get_thumbpath(options.thumbdir), # bad bad scope creep
+            'url': input_image.get_thumbpath(thumbdir), # bad bad scope creep
             'height': size[1],
             'width': size[0],
             },
@@ -157,32 +158,36 @@ def mkdir_p(path):
             pass
         else: raise
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--datafile', default='data/img', type=str)
-parser.add_argument('--skipthumbs', default=False, action="store_true")
-parser.add_argument('--thumbdir', default='data/thumbs', type=str)
-parser.add_argument('--thumbsize', default=160, type=int)
-parser.add_argument('--outfile', default='pins.js', type=str)
-parser.add_argument('--showatzero', default=False, action="store_true", help='Regard lat,log = 0,0 as valid coordinates')
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--datafile', default='data/img', type=str)
+    parser.add_argument('--skipthumbs', default=False, action="store_true")
+    parser.add_argument('--thumbdir', default='data/thumbs', type=str)
+    parser.add_argument('--thumbsize', default=160, type=int)
+    parser.add_argument('--outfile', default='pins.js', type=str)
+    parser.add_argument('--showatzero', default=False, action="store_true", help='Regard lat,log = 0,0 as valid coordinates')
 
-options = parser.parse_args()
+    options = parser.parse_args()
 
-mkdir_p(options.thumbdir)
+    mkdir_p(options.thumbdir)
 
-dtos = []
-imagepaths = find_images(options.datafile)
-for imagepath in imagepaths:
-    try:
-        exif_image = ExifImage(imagepath)
-        if not exif_image.has_gps(showatzero=options.showatzero):
-            print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
-            continue
-        dtos.append(exif_image_to_dto(exif_image))
-        if not options.skipthumbs:
-            exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
-    except Exception as exc:
-        print(exc, file=sys.stderr)
+    dtos = []
+    imagepaths = find_images(options.datafile)
+    for imagepath in imagepaths:
+        try:
+            exif_image = ExifImage(imagepath, options.skipthumbs)
+            if not exif_image.has_gps(showatzero=options.showatzero):
+                print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
+                continue
+            dtos.append(exif_image_to_dto(exif_image, options.thumbdir))
+            if not options.skipthumbs:
+                exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
+        except Exception as exc:
+            print(exc, file=sys.stderr)
 
-print("%d/%d images with usable exif data. %d without usable exif data." % (len(dtos), len(imagepaths), len(imagepaths) - len (dtos)))
+    print("%d/%d images with usable exif data. %d without usable exif data." % (len(dtos), len(imagepaths), len(imagepaths) - len (dtos)))
 
-fill_template(outfile=options.outfile, dtos=dtos)
+    fill_template(outfile=options.outfile, dtos=dtos)
+
+if __name__ == '__main__':
+    main()
