@@ -3,32 +3,13 @@ package main
 import (
 	"fmt"
 	"image/jpeg"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
 )
-
-func serveDir(r *mux.Router, prefix, dir string) {
-	h := http.StripPrefix(prefix, http.FileServer(http.Dir(dir)))
-	r.PathPrefix(prefix).Handler(h)
-}
-
-func serveFile(r *mux.Router, fn string) {
-	r.Path("/" + fn).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO: This should pass a chunked read/write loop back.
-		c, err := ioutil.ReadFile(fn)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("cannot read %s: %v", fn, err), 500)
-			return
-		}
-		w.Write(c)
-	})
-}
 
 func redirect(target string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +18,8 @@ func redirect(target string) http.HandlerFunc {
 }
 
 func thumbnailer(w http.ResponseWriter, r *http.Request) {
-	fn := strings.TrimSuffix(r.URL.Path, ".thumb.jpg")
+	vars := mux.Vars(r)
+	fn := vars["filename"]
 
 	// TODO: canonicalize
 	f, err := os.Open("./data/img/" + fn)
@@ -57,14 +39,26 @@ func thumbnailer(w http.ResponseWriter, r *http.Request) {
 	jpeg.Encode(w, t, nil)
 }
 
+func serveFile(r *mux.Router, path, fn string) {
+	r.Path(path).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, fn)
+	})
+}
+
 func main() {
 	r := mux.NewRouter()
-	r.PathPrefix("/data/thumbs/").Handler(http.StripPrefix("/data/thumbs/", http.HandlerFunc(thumbnailer)))
-	serveDir(r, "/data/", "./data/")
-	for _, fn := range []string{"index.html", "gpsplot.js"} {
-		serveFile(r, fn)
+	r.PathPrefix("/data/thumbs/{filename}.thumb.jpg").Handler(http.StripPrefix("/data/thumbs/", http.HandlerFunc(thumbnailer)))
+	r.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
+	files := map[string]string{
+		"/":           "index.html",
+		"/gpsplot.js": "gpsplot.js",
 	}
-	r.Path("/").HandlerFunc(redirect("/index.html"))
+	for path, fn := range files {
+		serveFile(r, path, fn)
+	}
+	r.Path("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "index.html")
+	})
 	http.Handle("/", r)
 
 	s := &http.Server{Addr: "127.0.0.1:8080"}
