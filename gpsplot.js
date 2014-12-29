@@ -41,15 +41,15 @@ function Thumbnail(height, width, url) {
   this.url = url;
 
   this.createElement = function() {
+    var box = document.createElement("div");
+	box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; display: inline-block; margin: 3px; text-align: center; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center; ');
     var thumbnail = document.createElement("img");
+	box.appendChild(thumbnail);
     sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
     thumbnail.setAttribute('src', this.url);
     thumbnail.setAttribute('height', sizes[0]);
     thumbnail.setAttribute('width', sizes[1]);
-    var w = (160 - sizes[0]) / 2 + 3;
-    var h = (160 - sizes[1]) / 2 + 3;
-    thumbnail.setAttribute('style', 'margin: ' + w + 'px ' + h + 'px ' + w + 'px ' + h + 'px;');
-    return thumbnail;
+    return box;
   }
 }
 
