@@ -18,7 +18,7 @@ Installation
 ============
 
 No special installation is required. You need python and a browser.
-You can run `bash init.sh` to download some pictures to run a demo.
+You can run `bash doc/demo.sh` to download some pictures to run a demo.
 
 
 
@@ -27,7 +27,7 @@ Usage
 
 * place all pictures you want to plot in `./data/img/`
 * run the python program to create the html page: `python preproc.py`
-* open the resulting `index.htm` in your browser
+* open the resulting `index.html` in your browser
 
 
 License
