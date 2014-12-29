@@ -23,7 +23,7 @@ import errno
 import os
 import sys
 from datetime import datetime
-import Image
+from PIL import Image
 import json
 
 # begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
@@ -166,12 +166,12 @@ imagepaths = find_images(options.datafile)
 for imagepath in imagepaths:
     exif_image = ExifImage(imagepath)
     if not exif_image.has_gps():
-        print >>sys.stderr, "notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn)
+        print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
         continue
     dtos.append(exif_image_to_dto(exif_image))
     if not options.skipthumbs:
         exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
 
-print "%d/%d images with usable exif data. %d without usable exif data." % (len(dtos), len(imagepaths), len(imagepaths) - len (dtos))
+print("%d/%d images with usable exif data. %d without usable exif data." % (len(dtos), len(imagepaths), len(imagepaths) - len (dtos)))
 
 fill_template(outfile=options.outfile, dtos=dtos)
