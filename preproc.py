@@ -78,7 +78,7 @@ class ExifImage(object):
             if (not self.has_exif()) or (self._raw_gps() is None):
                 return False
             x, y = self.gps_coords() # try to actually access them, might fail
-            if not showatzero and exif_image.is_at_zero():
+            if not showatzero and self.is_at_zero():
                 return False
             return True
         except:
