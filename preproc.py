@@ -164,13 +164,16 @@ mkdir_p(options.thumbdir)
 dtos = []
 imagepaths = find_images(options.datafile)
 for imagepath in imagepaths:
-    exif_image = ExifImage(imagepath)
-    if not exif_image.has_gps():
-        print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
-        continue
-    dtos.append(exif_image_to_dto(exif_image))
-    if not options.skipthumbs:
-        exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
+    try:
+        exif_image = ExifImage(imagepath)
+        if not exif_image.has_gps():
+            print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
+            continue
+        dtos.append(exif_image_to_dto(exif_image))
+        if not options.skipthumbs:
+            exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
+    except Exception as exc:
+        print(exc, file=sys.stderr)
 
 print("%d/%d images with usable exif data. %d without usable exif data." % (len(dtos), len(imagepaths), len(imagepaths) - len (dtos)))
 
