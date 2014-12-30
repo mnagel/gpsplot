@@ -115,7 +115,7 @@ class ExifImage(object):
         im.save(self.get_thumbpath(dir), 'JPEG', quality=98)
 
     def get_thumbpath(self, dir):
-        if self.skipthumbs: # bad bad scope creep
+        if self.skipthumbs:
             return self.fn
         return dir + '/' + os.path.basename(self.fn) + '.thumb.jpg'
 
