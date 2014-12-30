@@ -191,20 +191,35 @@ def main():
     dtos = []
 
     imagepaths = find_images(options.datafile, allfileextensions=options.allfileextensions)
+    stat_input = len(imagepaths)
+    stat_allok = 0
+    stat_unusable = 0
+    stat_heuristic = 0
     log("create list of %s images. starting to process them now." % len(imagepaths), options, prio=1)
-    for imagepath in imagepaths:
-        try:
-            exif_image = ExifImage(imagepath, options.skipthumbs)
-            if not exif_image.has_gps(showatzero=options.showatzero):
-                print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
-                continue
-            dtos.append(exif_image_to_dto(exif_image, options.thumbdir))
-            if not options.skipthumbs:
-                exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
-        except Exception as exc:
-            print("single picture exception: %s at %s" % (exc, traceback.format_exc()), file=sys.stderr)
+    try:
+        for imagepath in imagepaths:
+            try:
+                exif_image = ExifImage(imagepath, options.skipthumbs)
+                if not exif_image.has_gps(showatzero=options.showatzero):
+                    print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
+                    continue
+                dtos.append(exif_image_to_dto(exif_image, options.thumbdir))
+                if not options.skipthumbs:
+                    exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
+            except Exception as exc:
+                print("single picture exception: %s at %s" % (exc, traceback.format_exc()), file=sys.stderr)
+    except KeyboardInterrupt as exc:
+        # we stop the image processing, but still continue with the program.
+        # this way long-running preproc runs can be stopped and partial results can still be used.
+        log("Doing partial JSON writeout b/c of KeyboardInterrupt.", options)
 
-    print("%d/%d images with usable exif data. %d without usable exif data." % (len(dtos), len(imagepaths), len(imagepaths) - len (dtos)))
+    print("%d -> %d/%d/%d/%d (input -> ok/heuristic/broken/skipped)" % (
+        stat_input,
+        stat_allok,
+        stat_heuristic,
+        stat_unusable,
+        stat_input - (stat_allok+stat_heuristic+stat_unusable))
+    )
 
     fill_template(outfile=options.outfile, dtos=dtos)
 
