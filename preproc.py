@@ -191,6 +191,7 @@ def main():
     dtos = []
 
     imagepaths = find_images(options.datafile, allfileextensions=options.allfileextensions)
+    log("create list of %s images. starting to process them now." % len(imagepaths), options, prio=1)
     for imagepath in imagepaths:
         try:
             exif_image = ExifImage(imagepath, options.skipthumbs)
