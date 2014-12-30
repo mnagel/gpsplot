@@ -28,6 +28,7 @@ import json
 import os
 import re
 import sys
+import traceback
 
 # begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
 def degrees(dms):
@@ -200,7 +201,7 @@ def main():
             if not options.skipthumbs:
                 exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
         except Exception as exc:
-            print(exc, file=sys.stderr)
+            print("single picture exception: %s at %s" % (exc, traceback.format_exc()), file=sys.stderr)
 
     print("%d/%d images with usable exif data. %d without usable exif data." % (len(dtos), len(imagepaths), len(imagepaths) - len (dtos)))
 
