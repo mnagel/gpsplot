@@ -240,7 +240,7 @@ def main():
         stat_output,
         stat_heuristic,
         stat_nogps,
-        stat_input - (stat_output+stat_heuristic+stat_nogps+stat_exceptions),
+        stat_input - (stat_output+stat_nogps+stat_exceptions),
         stat_exceptions
         )
     )
