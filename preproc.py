@@ -68,7 +68,7 @@ class ExifImage(object):
         self.skipthumbs = skipthumbs
         try:
             self._exif = Image.open(fn)._getexif()
-        except:
+        except Exception:
             self._exif = None
 
     def has_exif(self):
