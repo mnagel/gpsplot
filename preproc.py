@@ -67,6 +67,7 @@ class ExifImage(object):
     def __init__(self, fn, skipthumbs=False):
         self.fn = fn
         self.skipthumbs = skipthumbs
+        self._heuristic_gps = False
         self._comment = ''
         try:
             self._exif = Image.open(fn)._getexif()
@@ -88,6 +89,10 @@ class ExifImage(object):
             print("{}: {}".format(self.fn, e))
             return False
 
+    def set_heuristic_gps(self, gps_coords):
+        self._heuristic_gps = gps_coords
+        self._comment = (self._comment or '') + ' HEURISTIC GPS'
+
 #    def has_date(self):
 #        return self.get_date() is None
 
@@ -99,6 +104,8 @@ class ExifImage(object):
         return self._exif.get(self._GPS, None)
 
     def gps_coords(self):
+        if self._heuristic_gps:
+            return self._heuristic_gps
         return coord_pair(self._raw_gps())
     
     def is_at_zero(self):
@@ -182,6 +189,7 @@ def main():
     parser.add_argument('--thumbsize', default=160, type=int)
     parser.add_argument('--outfile', default='data/pins.js', type=str)
     parser.add_argument('--showatzero', default=False, action="store_true", help='Regard lat,log = 0,0 as valid coordinates')
+    parser.add_argument('--useheuristicgps', default=False, action="store_true", help='use coordinates of previous picture if no valid coordinates are found')
     parser.add_argument('--allfileextensions', default=False, action="store_true", help='Scan all files for exif data, do not restrict to jpeg files')
     parser.add_argument('--verboseness', default=0, type=int)
     options = parser.parse_args()
@@ -192,33 +200,49 @@ def main():
 
     imagepaths = find_images(options.datafile, allfileextensions=options.allfileextensions)
     stat_input = len(imagepaths)
-    stat_allok = 0
-    stat_unusable = 0
+    stat_output = 0
+    stat_nogps = 0
     stat_heuristic = 0
+    stat_exceptions = 0
     log("create list of %s images. starting to process them now." % len(imagepaths), options, prio=1)
+
+    heuristic_gps_data = (0,0)
     try:
         for imagepath in imagepaths:
             try:
                 exif_image = ExifImage(imagepath, options.skipthumbs)
                 if not exif_image.has_gps(showatzero=options.showatzero):
-                    print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
-                    continue
-                dtos.append(exif_image_to_dto(exif_image, options.thumbdir))
+                    if options.useheuristicgps:
+                        print("notice: image {0} uses heuristic GPS data".format(exif_image.fn), file=sys.stderr)
+                        exif_image.set_heuristic_gps(heuristic_gps_data)
+                        stat_heuristic += 1
+                    else:
+                        print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
+                        stat_nogps += 1
+                        continue
+                heuristic_gps_data = exif_image.gps_coords()
+                dto = exif_image_to_dto(exif_image, options.thumbdir)
+                dtos.append(dto)
+                stat_output += 1
+                log("added image %s" % exif_image.fn, options, prio=1)
                 if not options.skipthumbs:
                     exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
             except Exception as exc:
                 print("single picture exception: %s at %s" % (exc, traceback.format_exc()), file=sys.stderr)
+                stat_exceptions += 1
     except KeyboardInterrupt as exc:
         # we stop the image processing, but still continue with the program.
         # this way long-running preproc runs can be stopped and partial results can still be used.
-        log("Doing partial JSON writeout b/c of KeyboardInterrupt.", options)
+        log("Doing partial JSON writeout after KeyboardInterrupt.", options)
 
-    print("%d -> %d/%d/%d/%d (input -> ok/heuristic/broken/skipped)" % (
+    print("%d -> %d/%d/%d/%d/%d (input -> output/heuristic/nogps/skipped/error)" % (
         stat_input,
-        stat_allok,
+        stat_output,
         stat_heuristic,
-        stat_unusable,
-        stat_input - (stat_allok+stat_heuristic+stat_unusable))
+        stat_nogps,
+        stat_input - (stat_output+stat_heuristic+stat_nogps+stat_exceptions),
+        stat_exceptions
+        )
     )
 
     fill_template(outfile=options.outfile, dtos=dtos)
