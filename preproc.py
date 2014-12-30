@@ -66,6 +66,7 @@ class ExifImage(object):
     def __init__(self, fn, skipthumbs=False):
         self.fn = fn
         self.skipthumbs = skipthumbs
+        self._comment = ''
         try:
             self._exif = Image.open(fn)._getexif()
         except Exception:
@@ -128,7 +129,7 @@ def exif_image_to_dto(input_image, thumbdir):
             'lon': gps_coords[1],
             },
         'timestamp': input_image.get_date().isoformat(),
-        'comment': "",
+        'comment': input_image._comment,
         'image': {
             'url': input_image.fn,
             },
