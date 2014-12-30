@@ -166,6 +166,12 @@ def mkdir_p(path):
             pass
         else: raise
 
+# TODO !!! get rid of ugly options parameter
+# TODO ! use some proper logging here
+def log(msg, options, prio=0):
+    if prio <= options.verboseness:
+        print(msg)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--datafile', default='data/img', type=str)
@@ -175,6 +181,7 @@ def main():
     parser.add_argument('--outfile', default='data/pins.js', type=str)
     parser.add_argument('--showatzero', default=False, action="store_true", help='Regard lat,log = 0,0 as valid coordinates')
     parser.add_argument('--allfileextensions', default=False, action="store_true", help='Scan all files for exif data, do not restrict to jpeg files')
+    parser.add_argument('--verboseness', default=0, type=int)
     options = parser.parse_args()
 
     mkdir_p(options.thumbdir)
