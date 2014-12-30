@@ -43,7 +43,7 @@ function Thumbnail(height, width, url, caption) {
 
   this.createElement = function() {
     var box = document.createElement("div");
-	box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; position: relative; display: inline-block; margin: 3px; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center;');
+    box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; position: relative; display: inline-block; margin: 3px; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center;');
     var thumbnail = document.createElement("img");
 	box.appendChild(thumbnail);
     sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
@@ -144,9 +144,12 @@ function dto_to_pin(dto) {
                     date: new Date(dto.timestamp),
                     comment: dto.comment,
                     url: dto.image.url,
-                    thumbnail: new Thumbnail(dto.thumbnail.height,
-                            dto.thumbnail.width, dto.thumbnail.url,
-							new Date(dto.timestamp).format('Y-m-d H:i:s'))
+                    thumbnail:
+                      new Thumbnail(
+                        dto.thumbnail.height,
+                        dto.thumbnail.width, dto.thumbnail.url,
+                        new Date(dto.timestamp).format('Y-m-d H:i:s')
+                      )
               });
 }
 
