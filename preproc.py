@@ -115,18 +115,18 @@ class ExifImage(object):
         im = Image.open(self.fn)
         return im.size # w, h
 
-    def create_thumbnail(self, dir, size):
-        if self.get_thumbpath(dir) == self.fn:
+    def create_thumbnail(self, basedir, size):
+        if self.get_thumbpath(basedir) == self.fn:
             print >>sys.stderr, "skipping as you are about to overwrite your input data at %s" % self.fn
             return
         im = Image.open(self.fn)
         im.thumbnail((size, size), Image.ANTIALIAS)
-        im.save(self.get_thumbpath(dir), 'JPEG', quality=98)
+        im.save(self.get_thumbpath(basedir), 'JPEG', quality=98)
 
-    def get_thumbpath(self, dir):
+    def get_thumbpath(self, basedir):
         if self.skipthumbs:
             return self.fn
-        return dir + '/' + os.path.basename(self.fn) + '.thumb.jpg'
+        return basedir + '/' + os.path.basename(self.fn) + '.thumb.jpg'
 
 def exif_image_to_dto(input_image, thumbdir):
     gps_coords = input_image.gps_coords()
