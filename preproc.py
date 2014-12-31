@@ -153,6 +153,8 @@ def find_images(basedir, allfileextensions=False):
     re_jpeg = re.compile('^\.jpe?g$', re.IGNORECASE)
     
     for subdir, dirs, files in os.walk(basedir):
+        dirs.sort()
+        files.sort()
         for file in files:
             if not allfileextensions:
                 _, extension = os.path.splitext(file)
