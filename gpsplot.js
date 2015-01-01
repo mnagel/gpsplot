@@ -43,7 +43,7 @@ function Thumbnail(height, width, url, caption) {
 
   this.createElement = function() {
     var box = document.createElement("div");
-	box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; position: relative; display: inline-block; margin: 3px; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center;');
+    box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; position: relative; display: inline-block; margin: 3px; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center;');
     var thumbnail = document.createElement("img");
 	box.appendChild(thumbnail);
     sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
@@ -70,11 +70,12 @@ function Pin(lat, lon, aux) {
     box.innerHTML = this.date.format('Y-m-d H:i:s') + "<br />" + this.comment;
     if (this.url) {
       box.appendChild(document.createElement('p'));
+      // TODO code duplication of below lines + onClusterClick
       var link = document.createElement('a');
       link.setAttribute('href', this.url);
       link.setAttribute('target', '_blank');
       link.setAttribute('data-lightbox', 'any_group_name');
-      link.setAttribute('data-title', this.date.format('Y-m-d H:i:s'));
+      link.setAttribute('data-title', this.date.format('Y-m-d H:i:s') + " " + this.comment);
       if (this.thumbnail) {
         link.appendChild(this.thumbnail.createElement());
       } else {
@@ -108,7 +109,7 @@ function onClusterClick(e) {
     link.setAttribute('href', marker.pin.url);
     link.setAttribute('target', '_blank');
     link.setAttribute('data-lightbox', 'any_group_name');
-    link.setAttribute('data-title', marker.pin.date.format('Y-m-d H:i:s'));
+    link.setAttribute('data-title', marker.pin.date.format('Y-m-d H:i:s') + " " + this.comment);
     if (marker.pin.thumbnail) {
       link.appendChild(marker.pin.thumbnail.createElement());
     } else {
@@ -143,9 +144,13 @@ function dto_to_pin(dto) {
                     date: new Date(dto.timestamp),
                     comment: dto.comment,
                     url: dto.image.url,
-                    thumbnail: new Thumbnail(dto.thumbnail.height,
-                            dto.image.width, dto.image.url,
-                            new Date(dto.timestamp).format('Y-m-d H:i:s'))
+                    thumbnail:
+                      new Thumbnail(
+                        dto.image.height,
+                        dto.image.width,
+                        dto.thumbnail.url,
+                        new Date(dto.timestamp).format('Y-m-d H:i:s')
+                      )
               });
 }
 
