@@ -131,11 +131,11 @@ def exif_image_to_dto(input_image, thumbdir):
         'comment': "",
         'image': {
             'url': input_image.fn,
+            'height': size[1],
+            'width': size[0],
             },
         'thumbnail': {
             'url': input_image.get_thumbpath(thumbdir), # bad bad scope creep
-            'height': size[1],
-            'width': size[0],
             },
         }
 

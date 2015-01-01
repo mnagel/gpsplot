@@ -144,8 +144,8 @@ function dto_to_pin(dto) {
                     comment: dto.comment,
                     url: dto.image.url,
                     thumbnail: new Thumbnail(dto.thumbnail.height,
-                            dto.thumbnail.width, dto.thumbnail.url,
-							new Date(dto.timestamp).format('Y-m-d H:i:s'))
+                            dto.image.width, dto.image.url,
+                            new Date(dto.timestamp).format('Y-m-d H:i:s'))
               });
 }
 
