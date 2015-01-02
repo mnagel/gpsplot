@@ -62,5 +62,6 @@ func main() {
 	http.Handle("/", r)
 
 	s := &http.Server{Addr: "127.0.0.1:8080"}
+	log.Println("started serving on http://127.0.0.1:8080")
 	log.Fatal(s.ListenAndServe())
 }
