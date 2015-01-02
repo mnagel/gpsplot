@@ -74,7 +74,7 @@ function Pin(lat, lon, aux) {
       link.setAttribute('href', this.url);
       link.setAttribute('target', '_blank');
       link.setAttribute('data-lightbox', 'any_group_name');
-      link.setAttribute('data-title', this.date.format('Y-m-d H:i:s') + this.comment);
+      link.setAttribute('data-title', this.date.format('Y-m-d H:i:s') + " " + this.url + " " + this.comment);
       if (this.thumbnail) {
         link.appendChild(this.thumbnail.createElement());
       } else {
@@ -108,7 +108,7 @@ function onClusterClick(e) {
     link.setAttribute('href', marker.pin.url);
     link.setAttribute('target', '_blank');
     link.setAttribute('data-lightbox', 'any_group_name');
-    link.setAttribute('data-title', marker.pin.date.format('Y-m-d H:i:s') + " " + marker.pin.comment);
+    link.setAttribute('data-title', marker.pin.date.format('Y-m-d H:i:s') + " " + marker.pin.url + " " + marker.pin.comment);
     if (marker.pin.thumbnail) {
       link.appendChild(marker.pin.thumbnail.createElement());
     } else {
