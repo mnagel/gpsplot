@@ -68,6 +68,7 @@ class ExifImage(object):
         self.fn = fn
         self.skipthumbs = skipthumbs
         self._heuristic_gps = False
+        self._heuristic_timestamp = False
         self._comment = ''
         try:
             self._exif = Image.open(fn)._getexif()
@@ -93,11 +94,21 @@ class ExifImage(object):
         self._heuristic_gps = gps_coords
         self._comment = (self._comment or '') + ' HEURISTIC GPS'
 
-#    def has_date(self):
-#        return self.get_date() is None
+    def set_heuristic_timestamp(self, ts):
+        self._heuristic_timestamp = ts
+        self._comment = (self._comment or '') + ' HEURISTIC TS'
+
+    def has_date(self):
+        if not self.has_exif:
+            return False
+        tmp = self._exif.get(self._DATE, None)
+        return tmp is not None
 
     def get_date(self):
-        inp = self._exif.get(self._DATE, None)
+        if self._heuristic_timestamp:
+            inp = self._heuristic_timestamp
+        else:
+            inp = self._exif.get(self._DATE, None)
         return datetime.strptime(inp, '%Y:%m:%d %H:%M:%S')
 
     def _raw_gps(self):
@@ -223,6 +234,13 @@ def main():
                         stat_nogps += 1
                         continue
                 heuristic_gps_data = exif_image.gps_coords()
+
+                if not exif_image.has_date():
+                    print("notice: image {0} uses fake timestamp data".format(exif_image.fn), file=sys.stderr)
+                    # TODO improve
+                    ts = '2022:02:22 22:22:22' # datetime.strptime('2022:02:22 22:22:22', '%Y:%m:%d %H:%M:%S')
+                    exif_image.set_heuristic_timestamp(ts)
+
                 dto = exif_image_to_dto(exif_image, options.thumbdir)
                 dtos.append(dto)
                 stat_output += 1
