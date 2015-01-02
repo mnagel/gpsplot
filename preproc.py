@@ -230,7 +230,7 @@ def main():
                 if not options.skipthumbs:
                     exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
             except Exception as exc:
-                print("single picture exception: %s at %s" % (exc, traceback.format_exc()), file=sys.stderr)
+                print("single picture exception in %s:\n%s at %s" % (imagepath, exc, traceback.format_exc()), file=sys.stderr)
                 stat_exceptions += 1
     except KeyboardInterrupt as exc:
         # we stop the image processing, but still continue with the program.
