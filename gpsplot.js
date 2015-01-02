@@ -67,7 +67,6 @@ function Pin(lat, lon, aux) {
 
   this.createPopup = function(marker) {
     var box = document.createElement('div');
-    box.innerHTML = this.date.format('Y-m-d H:i:s') + "<br />" + this.comment;
     if (this.url) {
       box.appendChild(document.createElement('p'));
       // TODO code duplication of below lines + onClusterClick
