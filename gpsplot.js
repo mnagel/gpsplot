@@ -100,10 +100,19 @@ function onMarkerClick(e) {
   }
 }
 
+function compareMarkers(a, b) {
+  if (a.pin.date == b.pin.date) {
+    return 0;
+  }
+  return (a.pin.date > b.pin.date) ? 1 : -1;
+}
+
 function onClusterClick(e) {
   var box = document.createElement('div');
   box.setAttribute('style', 'overflow: auto; max-height: 400px;');
-  e.layer.getAllChildMarkers().forEach(function(marker){
+  markers = e.layer.getAllChildMarkers()
+  markers = markers.sort(compareMarkers);
+  markers.forEach(function(marker){
     var link = document.createElement('a');
     link.setAttribute('href', marker.pin.url);
     link.setAttribute('target', '_blank');
