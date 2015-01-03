@@ -196,15 +196,15 @@ def log(msg, options, prio=0):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--datafile', default='data/img', type=str)
-    parser.add_argument('--skipthumbs', default=False, action="store_true")
-    parser.add_argument('--thumbdir', default='data/thumbs', type=str)
-    parser.add_argument('--thumbsize', default=160, type=int)
-    parser.add_argument('--outfile', default='data/pins.js', type=str)
-    parser.add_argument('--showatzero', default=False, action="store_true", help='Regard lat,log = 0,0 as valid coordinates')
+    parser.add_argument('--datafile', default='data/img', type=str, help='display pictures from this folder on the map')
+    parser.add_argument('--skipthumbs', default=False, action="store_true", help='skip thumbnail generation')
+    parser.add_argument('--thumbdir', default='data/thumbs', type=str, help='write generated thumbnails to this folder')
+    parser.add_argument('--thumbsize', default=160, type=int, help='scale thumbnail to fit within a XXX-by-XXX box')
+    parser.add_argument('--outfile', default='data/pins.js', type=str, help='save the generated JSON data needed at runtime to this file')
+    parser.add_argument('--showatzero', default=False, action="store_true", help='regard lat,log = 0,0 as valid coordinate pair')
     parser.add_argument('--useheuristicgps', default=False, action="store_true", help='use coordinates of previous picture if no valid coordinates are found')
-    parser.add_argument('--allfileextensions', default=False, action="store_true", help='Scan all files for exif data, do not restrict to jpeg files')
-    parser.add_argument('--verboseness', default=0, type=int)
+    parser.add_argument('--allfileextensions', default=False, action="store_true", help='scan all files for exif data, do not restrict to jpeg files')
+    parser.add_argument('--verboseness', default=0, type=int, help='increase this value to show more messages')
     options = parser.parse_args()
 
     mkdir_p(options.thumbdir)
