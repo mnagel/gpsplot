@@ -109,18 +109,10 @@ L.Control.SliderControl = L.Control.extend({
             slide: function (e, ui) {
                 var map = _options.map;
                 if(!!_options.markers[ui.value]) {
-                    // If there is no time property, this line has to be removed (or exchanged with a different property)
-                    if(_options.markers[ui.value].feature !== undefined) {
-                        if(_options.markers[ui.value].feature.properties.time){
-                            if(_options.markers[ui.value]) $('#slider-timestamp').html(_options.markers[ui.value].feature.properties.time.substr(0, 19));
-                        }else {
-                            console.error("You have to have a time property");
-                        }
-                    }else {
-                        // set by leaflet Vector Layers
-                        if(_options.markers [ui.value].options.time){
-                            if(_options.markers[ui.value]) $('#slider-timestamp').html(_options.markers[ui.value].options.time.substr(0, 19));
-                        }else {
+                    if (_options.markers[ui.value].pin !== undefined) {
+                        if (_options.markers[ui.value].pin.date){
+                            $('#slider-timestamp').html(_options.markers[ui.value].pin.date.format('Y-m-d H:i:s'));
+                        } else {
                             console.error("You have to have a time property");
                         }
                     }
