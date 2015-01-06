@@ -133,6 +133,7 @@ function plotToLayer(what, layer) {
   marker.pin = what;
   marker.on('click', onMarkerClick);
   layer.addLayer(marker);
+  return marker;
 }
 
 function activateDebug() {
@@ -164,9 +165,11 @@ function dto_to_pin(dto) {
 
 function main(pin_dtos) {
     var pins = pin_dtos.map(dto_to_pin);
+    var listOfMarkers = [];
     var markerClusterGroup = L.markerClusterGroup({zoomToBoundsOnClick: false});
     pins.forEach(function(pin) {
-      plotToLayer(pin, markerClusterGroup);
+      var result = plotToLayer(pin, markerClusterGroup, listOfMarkers);
+      listOfMarkers.push(result);
     });
     markerClusterGroup.on('clusterclick', onClusterClick);
     map.addLayer(markerClusterGroup);
