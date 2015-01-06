@@ -174,4 +174,29 @@ function main(pin_dtos) {
     markerClusterGroup.on('clusterclick', onClusterClick);
     map.addLayer(markerClusterGroup);
     map.fitBounds(markerClusterGroup.getBounds().pad(0.5));
+
+    //console.log(listOfMarkers);
+    //calculateTimeBuckets(listOfMarkers);
+}
+
+function bucketIdFor(marker) {
+  return marker.pin.date.format('Y-m')
+}
+
+function calculateTimeBuckets(markers) {
+  // assert that markers are sorted
+  markers = markers.sort(compareMarkers);
+
+  // dict with: BucketnameId => Marker[]
+  var buckets = {};
+
+  markers.forEach(function(marker) {
+    var myBucket = bucketIdFor(marker);
+    if(!(myBucket in buckets)) {
+        buckets[myBucket] = [];
+    }
+    buckets[myBucket].push(marker);
+  });
+  console.log(buckets);
+  return buckets;
 }
