@@ -164,11 +164,11 @@ function dto_to_pin(dto) {
 
 function main(pin_dtos) {
     var pins = pin_dtos.map(dto_to_pin);
-    var markers = L.markerClusterGroup({zoomToBoundsOnClick: false});
+    var markerClusterGroup = L.markerClusterGroup({zoomToBoundsOnClick: false});
     pins.forEach(function(pin) {
-      plotToLayer(pin, markers);
+      plotToLayer(pin, markerClusterGroup);
     });
-    markers.on('clusterclick', onClusterClick);
-    map.addLayer(markers);
-    map.fitBounds(markers.getBounds().pad(0.5));
+    markerClusterGroup.on('clusterclick', onClusterClick);
+    map.addLayer(markerClusterGroup);
+    map.fitBounds(markerClusterGroup.getBounds().pad(0.5));
 }
