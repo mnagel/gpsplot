@@ -27,7 +27,6 @@ L.Control.SliderControl = L.Control.extend({
     options: {
         position: 'topright',
         layer: null,
-        range: false,
         follow: false,
 
         markers: [],
@@ -37,7 +36,6 @@ L.Control.SliderControl = L.Control.extend({
 
     onAdd: function (map) {
         var options = this.options;
-        options.map = map;
 
         // Create a control sliderContainer with a jquery ui slider
         var sliderContainer = L.DomUtil.create('div', 'slider', this._container);
@@ -59,22 +57,21 @@ L.Control.SliderControl = L.Control.extend({
         }
 
         $(leafletSlider).slider({
-            range: options.range,
-            value: options.minValue + 1,
+            range: true,
+            values: [options.minValue, options.maxValue],
             min: options.minValue,
-            max: options.maxValue +1,
+            max: options.maxValue,
             step: 1,
             start: function( event, ui ) {
-                // Prevent map panning/zooming while using the slider
+                // Prevent options.layer panning/zooming while using the slider
                 map.dragging.disable();
             },
             stop: function( event, ui ) {
                 map.dragging.enable();
-                //Only show the slider timestamp while using the slider
+                // Only show the slider timestamp while using the slider
                 $(sliderTimestamp).hide();
             },
             slide: function (e, ui) {
-                var map = options.map;
                 if(!!options.markers[ui.value]) {
                     if (options.markers[ui.value].pin !== undefined) {
                         if (options.markers[ui.value].pin.date){
@@ -89,37 +86,36 @@ L.Control.SliderControl = L.Control.extend({
                     if(options.range){
                         // jquery ui using range
                         for (i = ui.values[0]; i <= ui.values[1]; i++){
-                           if(options.markers[i]) map.addLayer(options.markers[i]);
+                           if(options.markers[i]) options.layer.addLayer(options.markers[i]);
                         }
                         for (i = options.maxValue; i > ui.values[1]; i--) {
-                            if(options.markers[i]) map.removeLayer(options.markers[i]);
+                            if(options.markers[i]) options.layer.removeLayer(options.markers[i]);
                         }
                         for (i = options.minValue; i < ui.values[0]; i++) {
-                            if(options.markers[i]) map.removeLayer(options.markers[i]);
+                            if(options.markers[i]) options.layer.removeLayer(options.markers[i]);
                         }
                     }else if(options.follow){
                         for (i = options.minValue; i < (ui.value - options.follow); i++) {
-                            if(options.markers[i]) map.removeLayer(options.markers[i]);
+                            if(options.markers[i]) options.layer.removeLayer(options.markers[i]);
                         }
                         for (i = (ui.value - options.follow); i < ui.value ; i++) {
-                            if(options.markers[i]) map.addLayer(options.markers[i]);
+                            if(options.markers[i]) options.layer.addLayer(options.markers[i]);
                         }
                         for (i = ui.value; i <= options.maxValue; i++) {
-                            if(options.markers[i]) map.removeLayer(options.markers[i]);
+                            if(options.markers[i]) options.layer.removeLayer(options.markers[i]);
                         }
                     }else{
                         // jquery ui for point before
                         for (i = options.minValue; i <= ui.value ; i++) {
-                            if(options.markers[i]) map.addLayer(options.markers[i]);
+                            if(options.markers[i]) options.layer.addLayer(options.markers[i]);
                         }
                         for (i = (ui.value + 1); i <= options.maxValue; i++) {
-                            if(options.markers[i]) map.removeLayer(options.markers[i]);
+                            if(options.markers[i]) options.layer.removeLayer(options.markers[i]);
                         }
                     }
                 }
             }
         });
-        options.map.addLayer(options.markers[options.minValue]);
 
         return sliderContainer;
     },

@@ -175,15 +175,13 @@ function main(pin_dtos) {
     map.addLayer(markerClusterGroup);
     map.fitBounds(markerClusterGroup.getBounds().pad(0.5));
 
+    buckets = calculateTimeBuckets(listOfMarkers);
+
     var sliderControl = L.control.sliderControl({
       position: "topright",
       layer: markerClusterGroup,
-      range: true
     });
     map.addControl(sliderControl);
-
-    //console.log(listOfMarkers);
-    buckets = calculateTimeBuckets(listOfMarkers);
 
         console.log("a");
     console.log(document.getElementById("example"))
