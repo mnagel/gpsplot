@@ -175,6 +175,14 @@ function main(pin_dtos) {
     map.addLayer(markerClusterGroup);
     map.fitBounds(markerClusterGroup.getBounds().pad(0.5));
 
+    var sliderControl = L.control.sliderControl({
+      position: "topright",
+      layer: markerClusterGroup,
+      range: true
+    });
+    map.addControl(sliderControl);
+    sliderControl.startSlider();
+
     //console.log(listOfMarkers);
     //calculateTimeBuckets(listOfMarkers);
 }
