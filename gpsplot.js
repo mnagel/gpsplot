@@ -181,7 +181,6 @@ function main(pin_dtos) {
       range: true
     });
     map.addControl(sliderControl);
-    sliderControl.startSlider();
 
     //console.log(listOfMarkers);
     buckets = calculateTimeBuckets(listOfMarkers);
