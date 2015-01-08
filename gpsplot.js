@@ -239,9 +239,9 @@ function basic_time(container, buckets) {
         if(isNaN(x)) {
           return "";
         } else {
-          var x = parseInt(x);
-          var myDate = new Date(x);
-          return myDate.format('Y-m-d')
+          var xx = parseInt(x, 10);
+          var myDate = new Date(xx);
+          return myDate.format('Y-m-d');
         }
       }
     },
@@ -265,7 +265,7 @@ function basic_time(container, buckets) {
       mode : 'x'
     },
     HtmlText : false,
-    title : 'Picture Count',
+    title : 'Picture Count'
   };
 
   Flotr.draw(
