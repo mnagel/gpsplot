@@ -239,6 +239,7 @@ function basic_time(container, buckets) {
 
   options = {
     xaxis : {
+      mode: "time",
       labelsAngle : 0,
       tickFormatter: function(x) {
         if(isNaN(x)) {
