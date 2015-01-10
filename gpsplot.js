@@ -232,7 +232,7 @@ function basic_time(container, buckets) {
   var d1 = [], options, graph, i;
 
   for (i = 0; i < keys.length; i++) { // TODO nicer loop
-    var x = buckets[keys[i]][0].pin.date.getTime(); // TODO hacky
+    var x = buckets[keys[i]][0].pin.date.getTime(); // TODO hacky // TODO get beginning of month here!
     var y = buckets[keys[i]].length;
     d1.push([x, y]);
   }
