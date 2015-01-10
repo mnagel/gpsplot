@@ -279,4 +279,12 @@ function basic_time(container, buckets) {
     [ d1 ],
     options
   );
+
+  Flotr.EventAdapter.observe(container, 'flotr:select', function(area){
+    window.alert(
+      "pretty please put some code here that only draws pictures" +
+      " from " + timestamp2string(area.x1) + " to " + timestamp2string(area.x2)
+    );
+  });
+
 }
