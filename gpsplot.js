@@ -212,6 +212,11 @@ function calculateTimeBuckets(markers) {
   return buckets;
 }
 
+function timestamp2string(ts) {
+  var x = parseInt(ts, 10);
+  var myDate = new Date(x);
+  return myDate.format('Y-m-d');
+}
 
 // TODO this whole function is one big dirty ugly hack
 function basic_time(container, buckets) {
@@ -239,9 +244,7 @@ function basic_time(container, buckets) {
         if(isNaN(x)) {
           return "";
         } else {
-          var xx = parseInt(x, 10);
-          var myDate = new Date(xx);
-          return myDate.format('Y-m-d');
+          return timestamp2string(x);
         }
       }
     },
@@ -253,13 +256,15 @@ function basic_time(container, buckets) {
     },
     mouse : {
       track : true,
-      relative : true
+      relative : true,
+      position : 'ne',
+      trackFormatter : function(obj){ return timestamp2string(obj.x) +': ' + Math.floor(obj.y).toString() + ' pictures'; }
     },
     bars : {
       show : true,
       horizontal : false,
       shadowSize : 0,
-      barWidth : 0.5
+      barWidth : 30 /* days */ * (60 * 24 * 100) /* second->day */ * 1000 /* ms */ / 2 /* MAGIC 2*/
     },
     selection : {
       mode : 'x'
