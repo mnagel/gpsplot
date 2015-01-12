@@ -183,11 +183,8 @@ function main(pin_dtos) {
     });
     map.addControl(sliderControl);
 
-        console.log("a");
     console.log(document.getElementById("example"))
     basic_time(document.getElementById("example"), buckets);
-     console.log("b");
-
 }
 
 function bucketIdFor(marker) {
