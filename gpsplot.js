@@ -28,6 +28,7 @@ L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
   'Imagery © <a href="http://mapbox.com">Mapbox</a>',
   id: 'examples.map-i875mjb7'
 }).addTo(map);
+L.control.scale({maxWidth: 400}).addTo(map);
 
 function scaleIntoBox(x, y, boxsize) {
   var scale = boxsize / Math.max(x, y);
