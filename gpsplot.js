@@ -163,10 +163,22 @@ function dto_to_pin(dto) {
               });
 }
 
-function main(pin_dtos) {
+// TODO *cry for help* global state hack
+var markerClusterGroup = "hack";
+
+function main(pin_dtos, from, to) {
+    // TODO correct intendation
+
+    if (markerClusterGroup !== "hack") {
+      map.removeLayer(markerClusterGroup);
+    }
+
     var pins = pin_dtos.map(dto_to_pin);
+    if ((typeof from !== "undefined") && (typeof to !== "undefined")) {
+      pins = filterPinList(pins, from, to);
+    }
     var listOfMarkers = [];
-    var markerClusterGroup = L.markerClusterGroup({zoomToBoundsOnClick: false});
+    markerClusterGroup = L.markerClusterGroup({zoomToBoundsOnClick: false});
     pins.forEach(function(pin) {
       var result = plotToLayer(pin, markerClusterGroup, listOfMarkers);
       listOfMarkers.push(result);
@@ -191,6 +203,15 @@ function main(pin_dtos) {
 
 function bucketIdFor(marker) {
   return marker.pin.date.format('Y-m')
+}
+
+function filterPinList(pins, from, to) {
+  pins = pins.filter(function(elem) {
+    return (from <= elem.date) && (to > elem.date);
+  });
+  console.log("filtering from " + from.format('Y-m-d') + " to " + to.format('Y-m-d'));
+  console.log("should see " + pins.length + " pins now");
+  return pins;
 }
 
 function calculateTimeBuckets(markers) {
