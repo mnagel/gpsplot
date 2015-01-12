@@ -45,14 +45,14 @@ function Thumbnail(height, width, url, caption) {
     var box = document.createElement("div");
     box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; position: relative; display: inline-block; margin: 3px; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center;');
     var thumbnail = document.createElement("img");
-	box.appendChild(thumbnail);
+    box.appendChild(thumbnail);
     sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
     thumbnail.setAttribute('src', this.url);
-	thumbnail.setAttribute('style', 'max-height: 100%; max-width: 100%; width: auto; height: auto; position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;');
-	var caption = document.createElement("span");
-	box.appendChild(caption);
-	caption.setAttribute('style', 'position: absolute; bottom: 0; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.4);');
-	caption.innerHTML = this.caption;
+    thumbnail.setAttribute('style', 'max-height: 100%; max-width: 100%; width: auto; height: auto; position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;');
+    var caption = document.createElement("span");
+    box.appendChild(caption);
+    caption.setAttribute('style', 'position: absolute; bottom: 0; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.4);');
+    caption.innerHTML = this.caption;
     return box;
   }
 }
