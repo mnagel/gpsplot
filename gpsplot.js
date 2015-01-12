@@ -177,11 +177,13 @@ function main(pin_dtos) {
 
     buckets = calculateTimeBuckets(listOfMarkers);
 
+    /*
     var sliderControl = L.control.sliderControl({
       position: "topright",
       layer: markerClusterGroup,
     });
     map.addControl(sliderControl);
+    */
 
     console.log(document.getElementById("example"))
     basic_time(document.getElementById("example"), buckets);
