@@ -301,10 +301,15 @@ function basic_time(container, buckets) {
   );
 
   Flotr.EventAdapter.observe(container, 'flotr:select', function(area){
-    window.alert(
-      "pretty please put some code here that only draws pictures" +
-      " from " + timestamp2string(area.x1) + " to " + timestamp2string(area.x2)
+    console.log(
+      "selected from " + timestamp2string(area.x1) + " to " + timestamp2string(area.x2)
     );
+    main(pin_dtos, new Date(parseInt(area.x1, 10)), new Date(parseInt(area.x2, 10))); // in a spectacular case of scope creep, we access the global input variable
+  });
+
+  Flotr.EventAdapter.observe(container, 'flotr:click', function () {
+    console.log("resetting histo");
+    main(pin_dtos); // in a spectacular case of scope creep, we access the global input variable
   });
 
 }
