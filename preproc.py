@@ -118,7 +118,7 @@ class ExifImage(object):
         if self._heuristic_gps:
             return self._heuristic_gps
         return coord_pair(self._raw_gps())
-    
+
     def is_at_zero(self):
         return self.gps_coords() == (0, 0)
 
@@ -162,7 +162,7 @@ def exif_image_to_dto(input_image, thumbdir):
 def find_images(basedir, allfileextensions=False):
     datanames = []
     re_jpeg = re.compile('^\.jpe?g$', re.IGNORECASE)
-    
+
     for subdir, dirs, files in os.walk(basedir):
         dirs.sort()
         files.sort()
