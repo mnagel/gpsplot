@@ -237,8 +237,8 @@ def main():
 
                 if not exif_image.has_date():
                     print("notice: image {0} uses fake timestamp data".format(exif_image.fn), file=sys.stderr)
-                    # TODO improve
-                    ts = '2022:02:22 22:22:22' # datetime.strptime('2022:02:22 22:22:22', '%Y:%m:%d %H:%M:%S')
+                    # TODO do something much, much more sane for invalid dates
+                    ts = '2015:12:22 22:22:22'
                     exif_image.set_heuristic_timestamp(ts)
 
                 dto = exif_image_to_dto(exif_image, options.thumbdir)
