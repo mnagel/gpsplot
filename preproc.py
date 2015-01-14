@@ -23,7 +23,7 @@ from __future__ import print_function
 import argparse
 from datetime import datetime
 import errno
-from PIL import Image
+from PIL import Image, ExifTags
 import json
 import os
 import re
@@ -130,9 +130,33 @@ class ExifImage(object):
         if self.get_thumbpath(basedir) == self.fn:
             print >>sys.stderr, "skipping as you are about to overwrite your input data at %s" % self.fn
             return
-        im = Image.open(self.fn)
-        im.thumbnail((size, size), Image.ANTIALIAS)
-        im.save(self.get_thumbpath(basedir), 'JPEG', quality=98)
+
+        # TODO does not handle it gracefully if no exif orientation is present
+        # generate a correctly rotated thumbnail
+        # http://stackoverflow.com/a/11543365/2536029
+        try:
+            image = Image.open(self.fn)
+            if hasattr(image, '_getexif'): # only present in JPEGs
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation] == 'Orientation':
+                        break
+                e = image._getexif() # returns None if no EXIF data
+                if e is not None:
+                    exif = dict(e.items())
+                    orientation = exif[orientation]
+
+                    if orientation == 3:
+                        image = image.transpose(Image.ROTATE_180)
+                    elif orientation == 6:
+                        image = image.transpose(Image.ROTATE_270)
+                    elif orientation == 8:
+                        image = image.transpose(Image.ROTATE_90)
+
+            image.thumbnail((size, size), Image.ANTIALIAS)
+            image.save(self.get_thumbpath(basedir), 'JPEG', quality=98)
+
+        except Exception as e:
+            traceback.print_exc()
 
     def get_thumbpath(self, basedir):
         if self.skipthumbs:
