@@ -168,8 +168,6 @@ function dto_to_pin(dto) {
 var markerClusterGroup = "hack";
 
 function main(pin_dtos, from, to) {
-    // TODO correct intendation
-
     if (markerClusterGroup !== "hack") {
       map.removeLayer(markerClusterGroup);
     }
@@ -189,21 +187,8 @@ function main(pin_dtos, from, to) {
     map.fitBounds(markerClusterGroup.getBounds().pad(0.5));
 
     buckets = calculateTimeBuckets(listOfMarkers);
-
-    /*
-    var sliderControl = L.control.sliderControl({
-      position: "topright",
-      layer: markerClusterGroup,
-    });
-    map.addControl(sliderControl);
-    */
-
     console.log(document.getElementById("example"))
     basic_time(document.getElementById("example"), buckets);
-}
-
-function bucketIdFor(marker) {
-  return marker.pin.date.format('Y-m')
 }
 
 function filterPinList(pins, from, to) {
@@ -215,15 +200,28 @@ function filterPinList(pins, from, to) {
   return pins;
 }
 
-function calculateTimeBuckets(markers) {
-  // assert that markers are sorted
-  markers = markers.sort(compareMarkers);
+// HISTOGRAM-RELATED STUFF BELOW
 
+function bucketIdForDate(date) {
+  return date.format('Y-m');
+}
+
+function bucketIdForTime(time) {
+  var x = parseInt(time, 10);
+  return bucketIdForDate(new Date(x));
+}
+
+function bucketTimeForDate(date) {
+  var result = new Date(date.getFullYear(), date.getMonth(), 1);
+  return result.getTime();
+}
+
+function calculateTimeBuckets(markers) {
   // dict with: BucketnameId => Marker[]
   var buckets = {};
 
   markers.forEach(function(marker) {
-    var myBucket = bucketIdFor(marker);
+    var myBucket = bucketIdForDate(marker.pin.date);
     if(!(myBucket in buckets)) {
         buckets[myBucket] = [];
     }
@@ -233,48 +231,35 @@ function calculateTimeBuckets(markers) {
   return buckets;
 }
 
-function timestamp2string(ts) {
-  var x = parseInt(ts, 10);
-  var myDate = new Date(x);
-  return myDate.format('Y-m-d');
-}
-
-// TODO this whole function is one big dirty ugly hack
 function basic_time(container, buckets) {
-  var keys = [];
-  for (var key in buckets) {
-    if (buckets.hasOwnProperty(key)) {
-      keys.push(key);
-    }
-  }
-
-  keys = keys.sort();
-
   var d1 = [], options, graph, i;
 
-  for (i = 0; i < keys.length; i++) { // TODO nicer loop
-    var xx = buckets[keys[i]][0].pin.date; // some date in the bucket
-    var x = new Date(xx.getFullYear(), xx.getMonth(), 1);
-    x = x.getTime();
-    var y = buckets[keys[i]].length;
+  for (bucketId in buckets) {
+    // check if someone tampered with our class
+    if (!(buckets.hasOwnProperty(bucketId))) {
+      continue;
+    }
+    var firstPinDate = buckets[bucketId][0].pin.date;
+    var x = bucketTimeForDate(firstPinDate);
+    var y = buckets[bucketId].length;
     d1.push([x, y]);
   }
 
   options = {
     xaxis : {
-      mode: "time",
+      mode : "time",
       labelsAngle : 0,
-      tickFormatter: function(x) {
+      tickFormatter : function(x) {
         if(isNaN(x)) {
           return "";
         } else {
-          return timestamp2string(x);
+          return bucketIdForTime(x);
         }
       }
     },
     yaxis : {
       min : 0,
-      tickFormatter: function(x) {
+      tickFormatter : function(x) {
         return Math.floor(x).toString();
       }
     },
@@ -282,12 +267,13 @@ function basic_time(container, buckets) {
       track : true,
       relative : true,
       position : 'ne',
-      trackFormatter : function(obj){ return timestamp2string(obj.x) +': ' + Math.floor(obj.y).toString() + ' pictures'; }
+      trackFormatter : function(obj){ return bucketIdForTime(obj.x) +': ' + Math.floor(obj.y).toString() + ' pictures'; }
     },
     bars : {
       show : true,
       horizontal : false,
       shadowSize : 0,
+      // TODO this encodes info about the bucket width. refactor.
       barWidth : 30 /* days */ * (60 * 24 * 100) /* second->day */ * 1000 /* ms */ / 2 /* MAGIC 2*/
     },
     selection : {
@@ -304,15 +290,14 @@ function basic_time(container, buckets) {
   );
 
   Flotr.EventAdapter.observe(container, 'flotr:select', function(area){
-    console.log(
-      "selected from " + timestamp2string(area.x1) + " to " + timestamp2string(area.x2)
-    );
-    main(pin_dtos, new Date(parseInt(area.x1, 10)), new Date(parseInt(area.x2, 10))); // in a spectacular case of scope creep, we access the global input variable
+    // in a spectacular case of scope creep, we access the global input variable
+    main(pin_dtos, new Date(parseInt(area.x1, 10)), new Date(parseInt(area.x2, 10)));
   });
 
   Flotr.EventAdapter.observe(container, 'flotr:click', function () {
     console.log("resetting histo");
-    main(pin_dtos); // in a spectacular case of scope creep, we access the global input variable
+    // in a spectacular case of scope creep, we access the global input variable
+    main(pin_dtos);
   });
 
 }
