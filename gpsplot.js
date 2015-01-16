@@ -172,6 +172,7 @@ function dto_to_pin(dto) {
                     exifrotation: dto.image.rotation,
                     thumbnail:
                       new Thumbnail(
+                        // TODO this is senseless mixing of image/thumb
                         dto.image.height,
                         dto.image.width,
                         dto.thumbnail.url,
