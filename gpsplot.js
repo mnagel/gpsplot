@@ -58,12 +58,27 @@ function Thumbnail(height, width, url, caption) {
   }
 }
 
+function exifrotation2string(exif) {
+  var map = {
+    '1': "not at all",
+    '2': "x-mirror",
+    '3': "180 clock",
+    '4': "180 clock + x-mirror",
+    '5': "90 clock + x-mirror",
+    '6': "90 clock",
+    '7': "270 clock + x-mirror",
+    '8': "270 clock",
+  };
+  return map[exif];
+}
+
 function Pin(lat, lon, aux) {
   this.lat = lat;
   this.lon = lon;
   this.date = aux['date'];
   this.comment = aux['comment'];
   this.url = aux['url'];
+  this.rotation = aux['exifrotation'];
   this.thumbnail = aux['thumbnail'];
 
   this.createPopup = function(marker) {
@@ -75,7 +90,7 @@ function Pin(lat, lon, aux) {
       link.setAttribute('href', this.url);
       link.setAttribute('target', '_blank');
       link.setAttribute('data-lightbox', 'any_group_name');
-      link.setAttribute('data-title', this.date.format('Y-m-d H:i:s') + " " + this.url + " " + this.comment);
+      link.setAttribute('data-title', this.date.format('Y-m-d H:i:s') + " " + this.url + " " + this.comment + " please rotate " + exifrotation2string(this.rotation));
       if (this.thumbnail) {
         link.appendChild(this.thumbnail.createElement());
       } else {
@@ -118,7 +133,7 @@ function onClusterClick(e) {
     link.setAttribute('href', marker.pin.url);
     link.setAttribute('target', '_blank');
     link.setAttribute('data-lightbox', 'any_group_name');
-    link.setAttribute('data-title', marker.pin.date.format('Y-m-d H:i:s') + " " + marker.pin.url + " " + marker.pin.comment);
+    link.setAttribute('data-title', marker.pin.date.format('Y-m-d H:i:s') + " " + marker.pin.url + " " + marker.pin.comment + " please rotate " + exifrotation2string(marker.pin.rotation));
     if (marker.pin.thumbnail) {
       link.appendChild(marker.pin.thumbnail.createElement());
     } else {
@@ -154,6 +169,7 @@ function dto_to_pin(dto) {
                     date: new Date(dto.timestamp),
                     comment: dto.comment,
                     url: dto.image.url,
+                    exifrotation: dto.image.rotation,
                     thumbnail:
                       new Thumbnail(
                         dto.image.height,
