@@ -63,6 +63,9 @@ class ExifImage(object):
     # Magic EXIF number.
     _GPS = 34853
     _DATE = 36867
+    for _ORIENTATION in ExifTags.TAGS.keys():
+        if ExifTags.TAGS[_ORIENTATION] == 'Orientation':
+            break
 
     def __init__(self, fn, skipthumbs=False):
         self.fn = fn
@@ -110,6 +113,13 @@ class ExifImage(object):
         else:
             inp = self._exif.get(self._DATE, None)
         return datetime.strptime(inp, '%Y:%m:%d %H:%M:%S')
+
+    def get_rotation(self):
+        std = 1
+        try:
+            return self._exif.get(self._ORIENTATION, std)
+        except Exception as e:
+            return std
 
     def _raw_gps(self):
         return self._exif.get(self._GPS, None)
@@ -177,6 +187,7 @@ def exif_image_to_dto(input_image, thumbdir):
             'url': input_image.fn,
             'height': size[1],
             'width': size[0],
+            'rotation' : input_image.get_rotation(),
             },
         'thumbnail': {
             'url': input_image.get_thumbpath(thumbdir), # bad bad scope creep
