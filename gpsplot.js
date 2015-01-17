@@ -80,40 +80,6 @@ function Pin(lat, lon, aux) {
   this.url = aux['url'];
   this.rotation = aux['exifrotation'];
   this.thumbnail = aux['thumbnail'];
-
-  this.createPopup = function(marker) {
-    var box = document.createElement('div');
-    if (this.url) {
-      box.appendChild(document.createElement('p'));
-      // TODO code duplication of below lines + onClusterClick
-      var link = document.createElement('a');
-      link.setAttribute('href', this.url);
-      link.setAttribute('target', '_blank');
-      link.setAttribute('data-lightbox', 'any_group_name');
-      link.setAttribute('data-title', this.date.format('Y-m-d H:i:s') + " " + this.url + " " + this.comment + " please rotate " + exifrotation2string(this.rotation));
-      if (this.thumbnail) {
-        link.appendChild(this.thumbnail.createElement());
-      } else {
-        link.innerHTML = this.url;
-      }
-      box.appendChild(link);
-    } else {
-      if (this.thumbnail) {
-        box.appendChild(document.createElement('p'));
-        box.appendChild(this.thumbnail.createElement());
-      }
-    }
-    return marker.bindPopup(box);
-  }
-}
-
-function onMarkerClick(e) {
-  var marker = e.target;
-  var what = marker.pin;
-  if (!what.hasPopup) {
-    what.hasPopup = true;
-    what.createPopup(marker).openPopup();
-  }
 }
 
 function compareMarkers(a, b) {
@@ -124,10 +90,24 @@ function compareMarkers(a, b) {
 }
 
 function onClusterClick(e) {
+  var markers;
+  // TODO find a better way to handle these cases uniformly
+  if (e.type === "clusterclick") {
+    markers = e.layer.getAllChildMarkers();
+  }
+  else if (e.type === "click") {
+    markers = [ e.target ];
+  }
+  else {
+    console.log("clicked on an unrecognized entity");
+    return;
+  }
+  console.log("handling click on " + e.type + " " + e);
+  markers = markers.sort(compareMarkers);
+
   var box = document.createElement('div');
   box.setAttribute('style', 'overflow: auto; max-height: 400px;');
-  markers = e.layer.getAllChildMarkers()
-  markers = markers.sort(compareMarkers);
+
   markers.forEach(function(marker){
     var link = document.createElement('a');
     link.setAttribute('href', marker.pin.url);
@@ -146,13 +126,25 @@ function onClusterClick(e) {
     }
     box.appendChild(link);
   });
-  e.layer.bindPopup(box, {maxWidth: 520}).openPopup();
+
+  // TODO find a better way to handle these cases uniformly
+  if (e.type === "clusterclick") {
+    e.layer.bindPopup(box, {maxWidth: 520}).openPopup();
+  }
+  else if (e.type === "click") {
+    console.log("opening single image popup");
+    // TODO why is this very strange construct necessary?
+    if (!e.target.hasPopup) {
+      e.target.bindPopup(box, {maxWidth: 520}).openPopup();
+    }
+    e.target.hasPopup = true;
+  }
 }
 
 function plotToLayer(what, layer) {
   var marker = L.marker([what.lat, what.lon]);
   marker.pin = what;
-  marker.on('click', onMarkerClick);
+  marker.on('click', onClusterClick);
   layer.addLayer(marker);
   return marker;
 }
