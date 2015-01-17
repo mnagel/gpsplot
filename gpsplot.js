@@ -297,7 +297,7 @@ function basic_time(container, buckets) {
       mode : 'x'
     },
     HtmlText : false,
-    title : 'Picture Count'
+    title : 'Picture Count / Select Range (click to reset)'
   };
 
   Flotr.draw(
