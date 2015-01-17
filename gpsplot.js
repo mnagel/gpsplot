@@ -191,6 +191,18 @@ function dto_to_pin(dto) {
 // add empty group so that lateron a remove works unchecked
 var markerClusterGroup = L.markerClusterGroup({ });
 
+// TODO move *lots* of stuff here...
+function init(pin_dtos) {
+  // register the handler for clicking the histogram
+  Flotr.EventAdapter.observe(document.getElementById("histogram"), 'flotr:select', function(area){
+    main(pin_dtos, new Date(parseInt(area.x1, 10)), new Date(parseInt(area.x2, 10)));
+  });
+
+  Flotr.EventAdapter.observe(document.getElementById("histogram"), 'flotr:click', function () {
+    main(pin_dtos);
+  });
+}
+
 function main(pin_dtos, from, to) {
     map.removeLayer(markerClusterGroup);
 
@@ -313,16 +325,4 @@ function plot_histogram(container, buckets) {
     [ d1 ],
     options
   );
-
-  Flotr.EventAdapter.observe(container, 'flotr:select', function(area){
-    // in a spectacular case of scope creep, we access the global input variable
-    main(pin_dtos, new Date(parseInt(area.x1, 10)), new Date(parseInt(area.x2, 10)));
-  });
-
-  Flotr.EventAdapter.observe(container, 'flotr:click', function () {
-    console.log("resetting histo");
-    // in a spectacular case of scope creep, we access the global input variable
-    main(pin_dtos);
-  });
-
 }
