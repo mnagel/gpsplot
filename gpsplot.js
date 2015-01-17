@@ -199,6 +199,7 @@ function main(pin_dtos, from, to) {
     if ((typeof from !== "undefined") && (typeof to !== "undefined")) {
       pins = filterPinList(pins, from, to);
     }
+    console.log("should see " + pins.length + " pins now");
     var listOfMarkers = [];
     markerClusterGroup = L.markerClusterGroup({
       zoomToBoundsOnClick: false,
@@ -222,7 +223,6 @@ function filterPinList(pins, from, to) {
     return (from <= elem.date) && (to > elem.date);
   });
   console.log("filtering from " + from.format('Y-m-d') + " to " + to.format('Y-m-d'));
-  console.log("should see " + pins.length + " pins now");
   return pins;
 }
 
