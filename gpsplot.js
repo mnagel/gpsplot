@@ -214,7 +214,7 @@ function main(pin_dtos, from, to) {
 
     buckets = calculateTimeBuckets(listOfMarkers);
     console.log(document.getElementById("histogram"))
-    basic_time(document.getElementById("histogram"), buckets);
+    plot_histogram(document.getElementById("histogram"), buckets);
 }
 
 function filterPinList(pins, from, to) {
@@ -257,7 +257,7 @@ function calculateTimeBuckets(markers) {
   return buckets;
 }
 
-function basic_time(container, buckets) {
+function plot_histogram(container, buckets) {
   var d1 = [], options, graph, i;
 
   for (bucketId in buckets) {
