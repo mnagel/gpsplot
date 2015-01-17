@@ -133,7 +133,12 @@ function onClusterClick(e) {
     link.setAttribute('href', marker.pin.url);
     link.setAttribute('target', '_blank');
     link.setAttribute('data-lightbox', 'any_group_name');
-    link.setAttribute('data-title', marker.pin.date.format('Y-m-d H:i:s') + " " + marker.pin.url + " " + marker.pin.comment + " please rotate " + exifrotation2string(marker.pin.rotation));
+    link.setAttribute('data-title',
+      marker.pin.date.format('Y-m-d H:i:s')
+      + " " + marker.pin.url
+      + " " + marker.pin.comment
+      + " please rotate " + exifrotation2string(marker.pin.rotation)
+    );
     if (marker.pin.thumbnail) {
       link.appendChild(marker.pin.thumbnail.createElement());
     } else {
