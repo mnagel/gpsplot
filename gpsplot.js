@@ -188,12 +188,11 @@ function dto_to_pin(dto) {
 }
 
 // TODO *cry for help* global state hack
-var markerClusterGroup = "hack";
+// add empty group so that lateron a remove works unchecked
+var markerClusterGroup = L.markerClusterGroup({ });
 
 function main(pin_dtos, from, to) {
-    if (markerClusterGroup !== "hack") {
-      map.removeLayer(markerClusterGroup);
-    }
+    map.removeLayer(markerClusterGroup);
 
     var pins = pin_dtos.map(dto_to_pin);
     if ((typeof from !== "undefined") && (typeof to !== "undefined")) {
