@@ -16,6 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+ $("#expandable").hover(
+  function() {
+   $(this).stop().animate({"height":"300px"}, 200).addClass("dropped");
+  },
+  function() {
+    $(this).stop().animate({"height":"20px"}, 200).removeClass("dropped");
+  }
+);
+
 var THUMBSIZE = 160;
 
 var map = L.map('map').setView([50.50, 10], 7);
@@ -204,8 +213,8 @@ function main(pin_dtos, from, to) {
     map.fitBounds(markerClusterGroup.getBounds().pad(0.5));
 
     buckets = calculateTimeBuckets(listOfMarkers);
-    console.log(document.getElementById("example"))
-    basic_time(document.getElementById("example"), buckets);
+    console.log(document.getElementById("histogram"))
+    basic_time(document.getElementById("histogram"), buckets);
 }
 
 function filterPinList(pins, from, to) {
