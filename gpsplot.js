@@ -194,7 +194,10 @@ function main(pin_dtos, from, to) {
       pins = filterPinList(pins, from, to);
     }
     var listOfMarkers = [];
-    markerClusterGroup = L.markerClusterGroup({zoomToBoundsOnClick: false});
+    markerClusterGroup = L.markerClusterGroup({
+      zoomToBoundsOnClick: false,
+      singleMarkerMode: true,
+    });
     pins.forEach(function(pin) {
       var result = plotToLayer(pin, markerClusterGroup, listOfMarkers);
       listOfMarkers.push(result);
