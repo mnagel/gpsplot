@@ -230,14 +230,14 @@ function init(pin_dtos) {
 
 function markerClusterIconCreate(cluster) {
   var childCount = cluster.getChildCount();
-  var red = Math.min(Math.floor(2 * childCount), 255);
+  var redToGreen = 120 - Math.min(Math.floor(15 * Math.sqrt(childCount)), 120);
   var innerRadius = Math.max(Math.min(Math.floor(Math.sqrt(childCount)), 25), 15);
   var innerSize = 2 * innerRadius;
   var outerOffset = 5;
   var outerRadius = innerRadius + outerOffset;
   var outerSize = 2 * outerRadius;
   
-  return new L.DivIcon({ html: '<div class="marker-cluster-outer" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + outerRadius + 'px; background-color: rgba(' + red + ', ' + (255 - red) + ', 0, 0.6);"><div class="marker-cluster-inner" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + innerRadius + 'px;"><span style="line-height: ' + innerSize + 'px;">' + childCount + '</span></div></div>', className: '', iconSize: new L.Point(outerSize, outerSize) });
+  return new L.DivIcon({ html: '<div class="marker-cluster-outer" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + outerRadius + 'px; background-color: hsla(' + redToGreen + ', 100%, 50%, 0.6);"><div class="marker-cluster-inner" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + innerRadius + 'px;"><span style="line-height: ' + innerSize + 'px;">' + childCount + '</span></div></div>', className: '', iconSize: new L.Point(outerSize, outerSize) });
 }
 
 function main(pin_dtos, from, to) {
