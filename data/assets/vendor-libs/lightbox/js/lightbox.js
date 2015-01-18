@@ -16,12 +16,12 @@
       this.fadeDuration                = 500;
       this.fitImagesInViewport         = true;
       this.resizeDuration              = 700;
-      this.positionFromTop             = 50;
+      this.positionFromTop             = 5;
       this.showImageNumberLabel        = true;
       this.alwaysShowNavOnTouchDevices = false;
       this.wrapAround                  = false;
     }
-    
+
     // Change to localize to non-english language
     LightboxOptions.prototype.albumLabel = function(curImageNum, albumSize) {
       return "Image " + curImageNum + " of " + albumSize;
@@ -239,7 +239,7 @@
           windowWidth    = $(window).width();
           windowHeight   = $(window).height();
           maxImageWidth  = windowWidth - self.containerLeftPadding - self.containerRightPadding - 20;
-          maxImageHeight = windowHeight - self.containerTopPadding - self.containerBottomPadding - 120;
+          maxImageHeight = windowHeight - self.containerTopPadding - self.containerBottomPadding - 50;
 
           // Is there a fitting issue?
           if ((inputWidth > maxImageWidth) || (inputHeight > maxImageHeight)) {
