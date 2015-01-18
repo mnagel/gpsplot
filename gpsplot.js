@@ -67,20 +67,6 @@ function Thumbnail(height, width, url, caption) {
   }
 }
 
-function exifrotation2string(exif) {
-  var map = {
-    '1': "not at all",
-    '2': "x-mirror",
-    '3': "180 clock",
-    '4': "180 clock + x-mirror",
-    '5': "90 clock + x-mirror",
-    '6': "90 clock",
-    '7': "270 clock + x-mirror",
-    '8': "270 clock",
-  };
-  return map[exif];
-}
-
 function Pin(lat, lon, aux) {
   this.lat = lat;
   this.lon = lon;
@@ -126,8 +112,8 @@ function onClusterClick(e) {
       marker.pin.date.format('Y-m-d H:i:s')
       + " " + marker.pin.url
       + " " + marker.pin.comment
-      + " please rotate " + exifrotation2string(marker.pin.rotation)
-    );
+	);
+	link.setAttribute('data-rotation', marker.pin.rotation);
     if (marker.pin.thumbnail) {
       link.appendChild(marker.pin.thumbnail.createElement());
     } else {

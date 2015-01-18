@@ -135,7 +135,8 @@
       function addToAlbum($link) {
         self.album.push({
           link: $link.attr('href'),
-          title: $link.attr('data-title') || $link.attr('title')
+          title: $link.attr('data-title') || $link.attr('title'),
+          rotation: $link.attr('data-rotation') || 1,
         });
       }
 
@@ -192,16 +193,44 @@
 
       this.$outerContainer.addClass('animating');
 
+      function rotationalTransformation(rotation, width, height) {
+          var map = {
+            '1': "none", // todo
+            '2': "scale(-1, 1)", // todo
+            '3': "rotate(180deg)",
+            '4': "scale(-1, 1) rotate(180deg)",
+            '5': "scale(-1, 1) rotate(90deg); transform-origin: top left",
+            '6': "rotate(90deg) translateY(-" + width + "px); transform-origin: top left",
+            '7': "rotate(90deg) scale(-1, 1); transform-origin: top left",
+            '8': "rotate(-90deg) translateX(-" + height + "px); transform-origin: top left",
+          };
+          return "transform: " + map[rotation] + ";";
+      }
+      
+      function isRightAngleRotated(rotation) {
+          return rotation >= 5;
+      }
+      
       // When image to show is preloaded, we send the width and height to sizeContainer()
       var preloader = new Image();
       preloader.onload = function() {
-        var $preloader, imageHeight, imageWidth, maxImageHeight, maxImageWidth, windowHeight, windowWidth;
+        var $preloader, inputHeight, inputWidth, imageHeight, imageWidth, maxImageHeight, maxImageWidth, windowHeight, windowWidth;
         $image.attr('src', self.album[imageNumber].link);
 
         $preloader = $(preloader);
+		
+        // For 90deg rotated photo, we need to base the container on the
+		// rotated result. Hence swap width and height.
+        if (isRightAngleRotated(self.album[imageNumber].rotation)) {
+            inputHeight = preloader.width;
+            inputWidth = preloader.height;
+        } else {
+            inputHeight = preloader.height;
+            inputWidth = preloader.width;
+        }
 
-        $image.width(preloader.width);
-        $image.height(preloader.height);
+        $image.width(inputWidth);
+        $image.height(inputHeight);
         
         if (self.options.fitImagesInViewport) {
           // Fit image inside the viewport.
@@ -213,21 +242,37 @@
           maxImageHeight = windowHeight - self.containerTopPadding - self.containerBottomPadding - 120;
 
           // Is there a fitting issue?
-          if ((preloader.width > maxImageWidth) || (preloader.height > maxImageHeight)) {
-            if ((preloader.width / maxImageWidth) > (preloader.height / maxImageHeight)) {
+          if ((inputWidth > maxImageWidth) || (inputHeight > maxImageHeight)) {
+            if ((inputWidth / maxImageWidth) > (inputHeight / maxImageHeight)) {
               imageWidth  = maxImageWidth;
-              imageHeight = parseInt(preloader.height / (preloader.width / imageWidth), 10);
+              imageHeight = parseInt(inputHeight / (inputWidth / imageWidth), 10);
               $image.width(imageWidth);
               $image.height(imageHeight);
             } else {
               imageHeight = maxImageHeight;
-              imageWidth = parseInt(preloader.width / (preloader.height / imageHeight), 10);
+              imageWidth = parseInt(inputWidth / (inputHeight / imageHeight), 10);
               $image.width(imageWidth);
               $image.height(imageHeight);
             }
           }
         }
-        self.sizeContainer($image.width(), $image.height());
+        
+        inputHeight = $image.height();
+        inputWidth = $image.width();
+
+        // Transformations will reset width and height.
+        $image.attr('style', rotationalTransformation(self.album[imageNumber].rotation, inputWidth, inputHeight));
+        
+        // Re-swap width and height for 90deg rotated photo.
+        if (isRightAngleRotated(self.album[imageNumber].rotation)) {
+            $image.width(inputHeight);
+            $image.height(inputWidth);
+        } else {
+            $image.width(inputWidth);
+            $image.height(inputHeight);
+        }
+        
+        self.sizeContainer(inputWidth, inputHeight);
       };
 
       preloader.src          = this.album[imageNumber].link;
