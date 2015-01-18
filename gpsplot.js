@@ -237,7 +237,7 @@ function markerClusterIconCreate(cluster) {
   var outerRadius = innerRadius + outerOffset;
   var outerSize = 2 * outerRadius;
   
-  return new L.DivIcon({ html: '<div class="marker-cluster-outer" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + outerRadius + 'px; "><div class="marker-cluster-inner" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + innerRadius + 'px; background-color: rgba(' + red + ', ' + (255 - red) + ', 0, 0.8);"><span style="line-height: ' + innerSize + 'px;">' + childCount + '</span></div></div>', className: '', iconSize: new L.Point(outerSize, outerSize) });
+  return new L.DivIcon({ html: '<div class="marker-cluster-outer" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + outerRadius + 'px; background-color: rgba(' + red + ', ' + (255 - red) + ', 0, 0.6);"><div class="marker-cluster-inner" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + innerRadius + 'px;"><span style="line-height: ' + innerSize + 'px;">' + childCount + '</span></div></div>', className: '', iconSize: new L.Point(outerSize, outerSize) });
 }
 
 function main(pin_dtos, from, to) {
