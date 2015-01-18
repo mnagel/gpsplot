@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- $("#expandable").hover(
+$("#expandable").hover(
   function() {
    $(this).stop().animate({"height":"300px"}, 200).addClass("dropped");
   },
@@ -27,16 +27,53 @@
 
 var THUMBSIZE = 160;
 
-var map = L.map('map').setView([50.50, 10], 7);
-
-L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+var baseLayer = L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
   maxZoom: 18,
   attribution: '<a href="https://github.com/mnagel/gpsplot">GPSplot: "Your pictures and their origin."</a> | ' +
   'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
   '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
   'Imagery © <a href="http://mapbox.com">Mapbox</a>',
   id: 'examples.map-i875mjb7'
-}).addTo(map);
+});
+
+var cfg = {
+  // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+  // if scaleRadius is false it will be the constant radius used in pixels
+  "radius": 30,
+  "maxOpacity": .7, 
+  // scales the radius based on map zoom
+  "scaleRadius": false,
+  // if set to false the heatmap uses the global maximum for colorization
+  // if activated: uses the data maximum within the current map boundaries 
+  //   (there will always be a red spot with useLocalExtremas true)
+  "useLocalExtrema": true,
+  // which field name in your data represents the latitude - default "lat"
+  latField: 'lat',
+  // which field name in your data represents the longitude - default "lng"
+  //lngField: 'lng',
+  lngField: 'lon',
+  // which field name in your data represents the data value - default "value"
+  valueField: null
+};
+
+// TODO: Fix heatmap misalignment when zooming out too far
+// https://github.com/pa7/heatmap.js/issues/145
+var heatmapLayer = new HeatmapOverlay(cfg);
+
+var map = new L.Map('map', {
+  center: [50.50, 10],
+  zoom: 7,
+  // heatmapLayer needs to be included here to make the overlay work
+  // This seems to be a bug as errors occur when you try to add heatmapLayer dynamically:
+  // "leaflet-heatmap.js:125 Uncaught TypeError: Cannot read property 'setData' of undefined"
+  layers: [baseLayer, heatmapLayer]
+});
+
+// See comment above
+map.removeLayer(heatmapLayer);
+
+// Map layers can be added, too but since we have one at the moment it does not make sense yet
+L.control.layers({/*"Map": baseLayer*/}, {"Heatmap": heatmapLayer}).addTo(map);
 L.control.scale({maxWidth: 400}).addTo(map);
 
 function scaleIntoBox(x, y, boxsize) {
@@ -114,8 +151,8 @@ function onClusterClick(e) {
       + " " + marker.pin.url
       + " " + marker.pin.comment
       + '</a>'
-	);
-	link.setAttribute('data-rotation', marker.pin.rotation);
+    );
+    link.setAttribute('data-rotation', marker.pin.rotation);
     if (marker.pin.thumbnail) {
       link.appendChild(marker.pin.thumbnail.createElement());
     } else {
@@ -215,6 +252,8 @@ function main(pin_dtos, from, to) {
     buckets = calculateTimeBuckets(listOfMarkers);
     console.log(document.getElementById("histogram"))
     plot_histogram(document.getElementById("histogram"), buckets);
+  
+    heatmapLayer.setData({data: pins});
 }
 
 function filterPinList(pins, from, to) {
