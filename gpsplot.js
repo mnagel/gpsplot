@@ -206,7 +206,7 @@ function dto_to_pin(dto) {
                         // TODO this is senseless mixing of image/thumb
                         dto.image.height,
                         dto.image.width,
-                        dto.thumbnail.url,
+                        dto.thumbnail.url + '?imagePath=' + dto.image.url,
                         new Date(dto.timestamp).format('Y-m-d H:i:s')
                       )
               });

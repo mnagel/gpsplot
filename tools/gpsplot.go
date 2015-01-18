@@ -5,6 +5,7 @@ import (
 	"image/jpeg"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/gorilla/mux"
@@ -19,10 +20,15 @@ func redirect(target string) http.HandlerFunc {
 
 func thumbnailer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	fn := vars["filename"]
+	fn, err := url.QueryUnescape(vars["imagePath"])
 
+	if err != nil {
+		http.Error(w, fmt.Sprintf("cannot unescape url %s: %v", fn, err), 500)
+		return
+	}
+	
 	// TODO: canonicalize
-	f, err := os.Open("./data/img/" + fn)
+	f, err := os.Open("./" + fn)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("cannot open %s: %v", fn, err), 500)
 		return
@@ -47,7 +53,7 @@ func serveFile(r *mux.Router, path, fn string) {
 
 func main() {
 	r := mux.NewRouter()
-	r.PathPrefix("/data/thumbs/{filename}.thumb.jpg").Handler(http.StripPrefix("/data/thumbs/", http.HandlerFunc(thumbnailer)))
+	r.Queries("imagePath", "{imagePath:.*}").Handler(http.StripPrefix("/data/thumbs/", http.HandlerFunc(thumbnailer)))
 	r.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
 	files := map[string]string{
 		"/":           "index.html",
