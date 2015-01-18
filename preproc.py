@@ -23,6 +23,7 @@ from __future__ import print_function
 import argparse
 from datetime import datetime
 import errno
+import hashlib
 from PIL import Image, ExifTags
 import json
 import os
@@ -159,7 +160,11 @@ class ExifImage(object):
     def get_thumbpath(self, basedir):
         if self.skipthumbs:
             return self.fn
-        return basedir + '/' + os.path.basename(self.fn) + '.thumb.jpg'
+        
+        md5_object = hashlib.md5()
+        md5_object.update(self.fn.encode("utf-8"))
+        
+        return basedir + '/' + md5_object.hexdigest() + '.jpg'
 
 def exif_image_to_dto(input_image, thumbdir):
     gps_coords = input_image.gps_coords()
