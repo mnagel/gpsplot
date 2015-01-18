@@ -109,9 +109,11 @@ function onClusterClick(e) {
     link.setAttribute('target', '_blank');
     link.setAttribute('data-lightbox', 'any_group_name');
     link.setAttribute('data-title',
-      marker.pin.date.format('Y-m-d H:i:s')
+      '<a href="' + marker.pin.url + '" target="_blank">'
+      + marker.pin.date.format('Y-m-d H:i:s')
       + " " + marker.pin.url
       + " " + marker.pin.comment
+      + '</a>'
 	);
 	link.setAttribute('data-rotation', marker.pin.rotation);
     if (marker.pin.thumbnail) {
