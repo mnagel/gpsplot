@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"runtime"
 
 	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
@@ -26,7 +27,7 @@ func thumbnailer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("cannot unescape url %s: %v", fn, err), 500)
 		return
 	}
-	
+
 	// TODO: canonicalize
 	f, err := os.Open("./" + fn)
 	if err != nil {
@@ -52,6 +53,12 @@ func serveFile(r *mux.Router, path, fn string) {
 }
 
 func main() {
+	numcpu := runtime.NumCPU() - 1
+	if numcpu < 1 {
+		numcpu = 1
+	}
+	runtime.GOMAXPROCS(numcpu)
+
 	r := mux.NewRouter()
 	r.Queries("imagePath", "{imagePath:.*}").Handler(http.StripPrefix("/data/thumbs/", http.HandlerFunc(thumbnailer)))
 	r.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir("./data/"))))
