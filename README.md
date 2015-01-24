@@ -14,6 +14,24 @@ Screenshot
 
 
 
+Features
+========
+
+* images are diplayed on an interactive map
+* extraction of exif metadata
+* heuristic location detection
+* location based dynamic clustering
+* time based filtering via histogram
+* fullscreen slideshow of selected images
+* image location heatmap
+
+* local preprocessing in python
+* browser-based javascript runtime
+* optional go server
+* images are *not* uploaded to the cloud
+
+
+
 Installation
 ============
 
