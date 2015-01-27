@@ -295,5 +295,7 @@ def main():
 
     fill_template(outfile=options.outfile, dtos=dtos)
 
+    print("preprocessing done, open file://%s" % os.path.abspath(options.outfile + "/../../index.html"))
+
 if __name__ == '__main__':
     main()
