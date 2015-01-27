@@ -31,6 +31,21 @@ import re
 import sys
 import traceback
 
+def read_arguments(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--datafile', default='data/img', type=str, help='display pictures from this folder on the map')
+    parser.add_argument('--skipthumbs', default=False, action="store_true", help='skip thumbnail generation')
+    parser.add_argument('--thumbdir', default='data/thumbs', type=str, help='write generated thumbnails to this folder')
+    parser.add_argument('--thumbsize', default=160, type=int, help='scale thumbnail to fit within a XXX-by-XXX box')
+    parser.add_argument('--outfile', default='data/pins.js', type=str, help='save the generated JSON data needed at runtime to this file')
+    parser.add_argument('--showatzero', default=False, action="store_true", help='regard lat,log = 0,0 as valid coordinate pair')
+    parser.add_argument('--useheuristicgps', default=False, action="store_true", help='use coordinates of previous picture if no valid coordinates are found')
+    parser.add_argument('--allfileextensions', default=False, action="store_true", help='scan all files for exif data, do not restrict to jpeg files')
+    parser.add_argument('--verboseness', default=0, type=int, help='increase this value to show more messages')
+
+    options = parser.parse_args(args)
+    return options
+
 # begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
 def degrees(dms):
     '''Return decimal degrees from degree, minute, second tuple.
@@ -222,19 +237,7 @@ def log(msg, options, prio=0):
     if prio <= options.verboseness:
         print(msg)
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--datafile', default='data/img', type=str, help='display pictures from this folder on the map')
-    parser.add_argument('--skipthumbs', default=False, action="store_true", help='skip thumbnail generation')
-    parser.add_argument('--thumbdir', default='data/thumbs', type=str, help='write generated thumbnails to this folder')
-    parser.add_argument('--thumbsize', default=160, type=int, help='scale thumbnail to fit within a XXX-by-XXX box')
-    parser.add_argument('--outfile', default='data/pins.js', type=str, help='save the generated JSON data needed at runtime to this file')
-    parser.add_argument('--showatzero', default=False, action="store_true", help='regard lat,log = 0,0 as valid coordinate pair')
-    parser.add_argument('--useheuristicgps', default=False, action="store_true", help='use coordinates of previous picture if no valid coordinates are found')
-    parser.add_argument('--allfileextensions', default=False, action="store_true", help='scan all files for exif data, do not restrict to jpeg files')
-    parser.add_argument('--verboseness', default=0, type=int, help='increase this value to show more messages')
-    options = parser.parse_args()
-
+def main(options):
     mkdir_p(options.thumbdir)
 
     dtos = []
@@ -298,4 +301,5 @@ def main():
     print("preprocessing done, open file://%s" % os.path.abspath(options.outfile + "/../../index.html"))
 
 if __name__ == '__main__':
-    main()
+    options = read_arguments(sys.argv[1:])
+    main(options)
