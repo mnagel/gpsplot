@@ -256,6 +256,7 @@ function main(pin_dtos, from, to) {
     var listOfMarkers = [];
     markerClusterGroup = L.markerClusterGroup({
       zoomToBoundsOnClick: false,
+      spiderfyOnMaxZoom: false,
       singleMarkerMode: true,
       iconCreateFunction: markerClusterIconCreate
     });
