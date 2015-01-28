@@ -115,8 +115,15 @@ function Pin(lat, lon, aux) {
 }
 
 function compareMarkers(a, b) {
+  // TODO check consistency for both undefined
   if (a.pin.date == b.pin.date) {
     return 0;
+  }
+  if (!a.pin.date) {
+    return 1;
+  }
+  if (!a.pin.date) {
+    return -1;
   }
   return (a.pin.date > b.pin.date) ? 1 : -1;
 }
@@ -147,7 +154,7 @@ function onClusterClick(e) {
     link.setAttribute('data-lightbox', 'any_group_name');
     link.setAttribute('data-title',
       '<a href="' + marker.pin.url + '" target="_blank">'
-      + marker.pin.date.format('Y-m-d H:i:s')
+      + safeDateFormat(marker.pin.date)
       + " " + marker.pin.url
       + " " + marker.pin.comment
       + '</a>'
@@ -175,6 +182,14 @@ function onClusterClick(e) {
   }
 }
 
+// TODO use everywhere
+function safeDateFormat(date) {
+  if (date) {
+    return date.format('Y-m-d H:i:s');
+  }
+  return 'unknown date';
+}
+
 function plotToLayer(what, layer) {
   var marker = L.marker([what.lat, what.lon]);
   marker.pin = what;
@@ -184,20 +199,22 @@ function plotToLayer(what, layer) {
 }
 
 function dto_to_pin(dto) {
-    return new Pin(dto.gps.lat, dto.gps.lon, {
-                    date: new Date(dto.timestamp),
-                    comment: dto.comment,
-                    url: dto.image.url,
-                    exifrotation: dto.image.rotation,
-                    thumbnail:
-                      new Thumbnail(
-                        // TODO this is senseless mixing of image/thumb
-                        dto.image.height,
-                        dto.image.width,
-                        dto.thumbnail.url + '?imagePath=' + dto.image.url,
-                        new Date(dto.timestamp).format('Y-m-d H:i:s')
-                      )
-              });
+  var datevalue = dto.timestamp ? new Date(dto.timestamp) : undefined;
+
+  return new Pin(dto.gps.lat, dto.gps.lon, {
+                  date: datevalue,
+                  comment: dto.comment,
+                  url: dto.image.url,
+                  exifrotation: dto.image.rotation,
+                  thumbnail:
+                    new Thumbnail(
+                      // TODO this is senseless mixing of image/thumb
+                      dto.image.height,
+                      dto.image.width,
+                      dto.thumbnail.url + '?imagePath=' + dto.image.url,
+                      safeDateFormat(datevalue)
+                    )
+            });
 }
 
 // TODO *cry for help* global state hack
@@ -268,7 +285,10 @@ function filterPinList(pins, from, to) {
 // HISTOGRAM-RELATED STUFF BELOW
 
 function bucketIdForDate(date) {
-  return date.format('Y-m');
+  if (date) {
+    return date.format('Y-m');
+  }
+  return undefined;
 }
 
 function bucketIdForTime(time) {
@@ -277,8 +297,11 @@ function bucketIdForTime(time) {
 }
 
 function bucketTimeForDate(date) {
-  var result = new Date(date.getFullYear(), date.getMonth(), 1);
-  return result.getTime();
+  if (date) {
+    var result = new Date(date.getFullYear(), date.getMonth(), 1);
+    return result.getTime();
+  }
+  return undefined;
 }
 
 function calculateTimeBuckets(markers) {
