@@ -257,7 +257,7 @@ function main(pin_dtos, from, to) {
     markerClusterGroup = L.markerClusterGroup({
       zoomToBoundsOnClick: false,
       singleMarkerMode: true,
-	  iconCreateFunction: markerClusterIconCreate
+      iconCreateFunction: markerClusterIconCreate
     });
     pins.forEach(function(pin) {
       var result = plotToLayer(pin, markerClusterGroup, listOfMarkers);
