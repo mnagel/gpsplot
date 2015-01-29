@@ -95,6 +95,7 @@ function Thumbnail(height, width, url, caption) {
     box.appendChild(thumbnail);
     sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
     thumbnail.setAttribute('src', this.url);
+    thumbnail.setAttribute('class', 'noselect');
     thumbnail.setAttribute('style', 'max-height: 100%; max-width: 100%; width: auto; height: auto; position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;');
     var caption = document.createElement("span");
     box.appendChild(caption);

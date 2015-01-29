@@ -52,6 +52,14 @@ body:after {
   -ms-border-radius: 4px;
   -o-border-radius: 4px;
   border-radius: 4px;
+  
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  
 }
 
 .lb-outerContainer:after {
