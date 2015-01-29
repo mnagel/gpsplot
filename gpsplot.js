@@ -40,11 +40,11 @@ var cfg = {
   // radius should be small ONLY if scaleRadius is true (or small radius is intended)
   // if scaleRadius is false it will be the constant radius used in pixels
   "radius": 30,
-  "maxOpacity": .7, 
+  "maxOpacity": .7,
   // scales the radius based on map zoom
   "scaleRadius": false,
   // if set to false the heatmap uses the global maximum for colorization
-  // if activated: uses the data maximum within the current map boundaries 
+  // if activated: uses the data maximum within the current map boundaries
   //   (there will always be a red spot with useLocalExtremas true)
   "useLocalExtrema": true,
   // which field name in your data represents the latitude - default "lat"
@@ -241,7 +241,7 @@ function markerClusterIconCreate(cluster) {
   var outerOffset = 5;
   var outerRadius = innerRadius + outerOffset;
   var outerSize = 2 * outerRadius;
-  
+
   return new L.DivIcon({ html: '<div class="marker-cluster-outer" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + outerRadius + 'px; background-color: hsla(' + redToGreen + ', 100%, 50%, 0.6);"><div class="marker-cluster-inner" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + innerRadius + 'px;"><span style="line-height: ' + innerSize + 'px;">' + childCount + '</span></div></div>', className: '', iconSize: new L.Point(outerSize, outerSize) });
 }
 
@@ -271,7 +271,7 @@ function main(pin_dtos, from, to) {
     buckets = calculateTimeBuckets(listOfMarkers);
     console.log(document.getElementById("histogram"))
     plot_histogram(document.getElementById("histogram"), buckets);
-  
+
     heatmapLayer.setData({data: pins});
 }
 
