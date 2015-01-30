@@ -370,7 +370,8 @@ function plot_histogram(container, buckets) {
       mode : 'x'
     },
     HtmlText : false,
-    title : 'Picture Count / Select Range (click to reset)'
+    // TODO more bucket width knowledge
+    title : 'Pictures per Month (' + bucketIdForTime(d1[0][0]) + ' until ' + bucketIdForTime(d1[d1.length-1][0]) +  ', click to reset filter)'
   };
 
   Flotr.draw(
