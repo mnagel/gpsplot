@@ -128,6 +128,8 @@ class ExifImage(object):
             inp = self._heuristic_timestamp
         else:
             inp = self._exif.get(self._DATE, None)
+        if not inp:
+            return None
         return datetime.strptime(inp, '%Y:%m:%d %H:%M:%S')
 
     def get_rotation(self):
@@ -184,12 +186,11 @@ class ExifImage(object):
 def exif_image_to_dto(input_image, thumbdir):
     gps_coords = input_image.gps_coords()
     size = input_image.size()
-    return {
+    result = {
         'gps': {
             'lat': gps_coords[0],
             'lon': gps_coords[1],
             },
-        'timestamp': input_image.get_date().isoformat(),
         'comment': input_image._comment,
         'image': {
             'url': input_image.fn,
@@ -201,6 +202,9 @@ def exif_image_to_dto(input_image, thumbdir):
             'url': input_image.get_thumbpath(thumbdir), # bad bad scope creep
             },
         }
+    if input_image.get_date():
+        result['timestamp'] = input_image.get_date().isoformat()
+    return result
 
 def find_images(basedir, allfileextensions=False):
     datanames = []
@@ -268,9 +272,7 @@ def main(options):
 
                 if not exif_image.has_date():
                     print("notice: image {0} uses fake timestamp data".format(exif_image.fn), file=sys.stderr)
-                    # TODO do something much, much more sane for invalid dates
-                    ts = '2015:12:22 22:22:22'
-                    exif_image.set_heuristic_timestamp(ts)
+                    exif_image.set_heuristic_timestamp(None)
 
                 dto = exif_image_to_dto(exif_image, options.thumbdir)
                 dtos.append(dto)
