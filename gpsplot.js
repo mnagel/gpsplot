@@ -226,7 +226,11 @@ var markerClusterGroup = L.markerClusterGroup({ });
 function init(pin_dtos) {
   // register the handler for clicking the histogram
   Flotr.EventAdapter.observe(document.getElementById("histogram"), 'flotr:select', function(area){
-    main(pin_dtos, new Date(parseInt(area.x1, 10)), new Date(parseInt(area.x2, 10)));
+    var start = new Date(parseInt(area.x1, 10));
+    start = new Date( bucketTimeForDate(start) ); // beginning of month
+    var end = new Date(parseInt(area.x2, 10));
+    end = new Date( nextBucketTimeForDate(end) ); // beginning of next month
+    main(pin_dtos, start, end);
   });
 
   Flotr.EventAdapter.observe(document.getElementById("histogram"), 'flotr:click', function () {
@@ -302,6 +306,20 @@ function bucketTimeForDate(date) {
   if (date) {
     var result = new Date(date.getFullYear(), date.getMonth(), 1);
     return result.getTime();
+  }
+  return undefined;
+}
+
+function nextBucketTimeForDate(date) {
+  if (date) {
+    if (date.getMonth() == 11) {
+      var result = new Date(date.getFullYear() + 1, 0, 1);
+      return result.getTime();
+    }
+    else {
+      var result = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+      return result.getTime();
+    }
   }
   return undefined;
 }
