@@ -364,7 +364,7 @@ function plot_histogram(container, buckets) {
       horizontal : false,
       shadowSize : 0,
       // TODO this encodes info about the bucket width. refactor.
-      barWidth : 30 /* days */ * (60 * 24 * 100) /* second->day */ * 1000 /* ms */ / 2 /* MAGIC 2*/
+      barWidth : 1000 /* ms->second */ * 60 * 60 * 24 /* second->day */ * 27 /* day->nearly a month */
     },
     selection : {
       mode : 'x'
