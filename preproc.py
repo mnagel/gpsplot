@@ -206,7 +206,7 @@ def find_images(basedir, allfileextensions=False):
     datanames = []
     re_jpeg = re.compile('^\.jpe?g$', re.IGNORECASE)
 
-    for subdir, dirs, files in os.walk(basedir):
+    for subdir, dirs, files in os.walk(basedir, followlinks=True):
         dirs.sort()
         files.sort()
         for file in files:
