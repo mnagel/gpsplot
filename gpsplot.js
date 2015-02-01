@@ -163,7 +163,7 @@ function onClusterClick(e) {
     if (marker.pin.thumbnail) {
       link.appendChild(marker.pin.thumbnail.createElement());
     } else {
-      link.innerHTML = marker.pin.url;
+      link.innerHTML = '<div>' + safeDateFormat(marker.pin.date) + ': ' + marker.pin.comment + '</div>';
     }
     box.appendChild(link);
   });
