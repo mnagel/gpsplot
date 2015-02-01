@@ -204,16 +204,16 @@ function dto_to_pin(dto) {
   return new Pin(dto.gps.lat, dto.gps.lon, {
                   date: datevalue,
                   comment: dto.comment,
-                  url: dto.image.url,
-                  exifrotation: dto.image.rotation,
-                  thumbnail:
+                  url: dto.image ? dto.image.url : undefined,
+                  exifrotation: dto.image ? dto.image.rotation : undefined,
+                  thumbnail: dto.image ?
                     new Thumbnail(
                       // TODO this is senseless mixing of image/thumb
                       dto.image.height,
                       dto.image.width,
                       dto.thumbnail.url + '?imagePath=' + dto.image.url,
                       safeDateFormat(datevalue)
-                    )
+                    ) : undefined
             });
 }
 
