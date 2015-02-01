@@ -146,7 +146,6 @@ function onClusterClick(e) {
   markers = markers.sort(compareMarkers);
 
   var box = document.createElement('div');
-  box.setAttribute('style', 'overflow: auto; max-height: 400px;');
 
   markers.forEach(function(marker){
     var link = document.createElement('a');
@@ -171,13 +170,13 @@ function onClusterClick(e) {
 
   // TODO find a better way to handle these cases uniformly
   if (e.type === "clusterclick") {
-    e.layer.bindPopup(box, {maxWidth: 520}).openPopup();
+    e.layer.bindPopup(box, {maxWidth: 520, maxHeight: 400}).openPopup();
   }
   else if (e.type === "click") {
     console.log("opening single image popup");
     // TODO why is this very strange construct necessary?
     if (!e.target.hasPopup) {
-      e.target.bindPopup(box, {maxWidth: 520}).openPopup();
+      e.target.bindPopup(box, {maxWidth: 520, maxHeight: 400}).openPopup();
     }
     e.target.hasPopup = true;
   }
