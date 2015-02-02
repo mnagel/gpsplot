@@ -210,7 +210,7 @@ function dto_to_pin(dto) {
   return new Pin(dto.gps.lat, dto.gps.lon, {
                   date: datevalue,
                   comment: dto.comment,
-                  url: dto.image ? dto.image.url : undefined,
+                  url: dto.url ? dto.url : (dto.image ? dto.image.url : undefined),
                   exifrotation: dto.image ? dto.image.rotation : undefined,
                   thumbnail: dto.thumbnail ?
                     new Thumbnail(
