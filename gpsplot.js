@@ -212,7 +212,7 @@ function dto_to_pin(dto) {
                   comment: dto.comment,
                   url: dto.image ? dto.image.url : undefined,
                   exifrotation: dto.image ? dto.image.rotation : undefined,
-                  thumbnail: dto.image ?
+                  thumbnail: dto.thumbnail ?
                     new Thumbnail(
                       // TODO this is senseless mixing of image/thumb
                       dto.image.height,
