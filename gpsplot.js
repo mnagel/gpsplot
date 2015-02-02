@@ -16,6 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var options = {
+  'useLightbox': true,
+}
+
 $("#expandable").hover(
   function() {
    $(this).stop().animate({"height":"300px"}, 200).addClass("dropped");
@@ -151,7 +155,9 @@ function onClusterClick(e) {
     var link = document.createElement('a');
     link.setAttribute('href', marker.pin.url);
     link.setAttribute('target', '_blank');
-    link.setAttribute('data-lightbox', 'any_group_name');
+    if (options.useLightbox) {
+      link.setAttribute('data-lightbox', 'any_group_name');
+    }
     link.setAttribute('data-title',
       '<a href="' + marker.pin.url + '" target="_blank">'
       + safeDateFormat(marker.pin.date)
