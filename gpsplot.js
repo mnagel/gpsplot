@@ -215,10 +215,10 @@ function dto_to_pin(dto) {
                   thumbnail: dto.thumbnail ?
                     new Thumbnail(
                       // TODO this is senseless mixing of image/thumb
-                      dto.image.height,
-                      dto.image.width,
-                      dto.thumbnail.url + '?imagePath=' + dto.image.url,
-                      safeDateFormat(datevalue)
+                      dto.image ? dto.image.height : 80,
+                      dto.image ? dto.image.width : 80,
+                      (dto.thumbnail && dto.image) ? (dto.thumbnail.url + '?imagePath=' + dto.image.url) : (dto.thumbnail ? dto.thumbnail.url : undefined),
+                      datevalue ? safeDateFormat(datevalue) : (dto.comment ? dto.comment : '&nbsp;')
                     ) : undefined
             });
 }
