@@ -18,7 +18,7 @@
 
 var options = {
   'useLightbox': true,
-}
+};
 
 $("#expandable").hover(
   function() {
@@ -44,7 +44,7 @@ var cfg = {
   // radius should be small ONLY if scaleRadius is true (or small radius is intended)
   // if scaleRadius is false it will be the constant radius used in pixels
   "radius": 30,
-  "maxOpacity": .7,
+  "maxOpacity": 0.7,
   // scales the radius based on map zoom
   "scaleRadius": false,
   // if set to false the heatmap uses the global maximum for colorization
@@ -97,7 +97,7 @@ function Thumbnail(height, width, url, caption) {
     box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; position: relative; display: inline-block; margin: 3px; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center;');
     var thumbnail = document.createElement("img");
     box.appendChild(thumbnail);
-    sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
+    var sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
     thumbnail.setAttribute('src', this.url);
     thumbnail.setAttribute('class', 'noselect');
     thumbnail.setAttribute('style', 'max-height: 100%; max-width: 100%; width: auto; height: auto; position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;');
@@ -112,11 +112,11 @@ function Thumbnail(height, width, url, caption) {
 function Pin(lat, lon, aux) {
   this.lat = lat;
   this.lon = lon;
-  this.date = aux['date'];
-  this.comment = aux['comment'];
-  this.url = aux['url'];
-  this.rotation = aux['exifrotation'];
-  this.thumbnail = aux['thumbnail'];
+  this.date = aux.date;
+  this.comment = aux.comment;
+  this.url = aux.url;
+  this.rotation = aux.exifrotation;
+  this.thumbnail = aux.thumbnail;
 }
 
 function compareMarkers(a, b) {
@@ -278,8 +278,8 @@ function main(pin_dtos, from, to) {
     map.addLayer(markerClusterGroup);
     map.fitBounds(markerClusterGroup.getBounds().pad(0.5));
 
-    buckets = calculateTimeBuckets(listOfMarkers);
-    console.log(document.getElementById("histogram"))
+    var buckets = calculateTimeBuckets(listOfMarkers);
+    console.log(document.getElementById("histogram"));
     plot_histogram(document.getElementById("histogram"), buckets);
 
     heatmapLayer.setData({data: pins});
@@ -345,9 +345,9 @@ function calculateTimeBuckets(markers) {
 }
 
 function plot_histogram(container, buckets) {
-  var d1 = [], options, graph, i;
+  var d1 = [], options;
 
-  for (bucketId in buckets) {
+  for (var bucketId in buckets) {
     // check if someone tampered with our class
     if (!(buckets.hasOwnProperty(bucketId))) {
       continue;
