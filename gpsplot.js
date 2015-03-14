@@ -94,17 +94,45 @@ function Thumbnail(height, width, url, caption) {
 
   this.createElement = function() {
     var box = document.createElement("div");
-    box.setAttribute('style', 'width: ' + THUMBSIZE + 'px; height: ' + THUMBSIZE + 'px; position: relative; display: inline-block; margin: 3px; background-image: url("data/assets/loading.png"); background-repeat: no-repeat; background-position: center;');
+    box.setAttribute('style',
+         'width: ' + THUMBSIZE + 'px;'
+      + ' height: ' + THUMBSIZE + 'px;'
+      + ' position: relative;'
+      + ' display: inline-block;'
+      + ' margin: 3px;'
+      + ' background-image: url("data/assets/loading.png");'
+      + ' background-repeat: no-repeat;'
+      + ' background-position: center;'
+    );
     var thumbnail = document.createElement("img");
     box.appendChild(thumbnail);
     var sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
     thumbnail.setAttribute('src', this.url);
     thumbnail.setAttribute('class', 'noselect');
-    thumbnail.setAttribute('style', 'max-height: 100%; max-width: 100%; width: auto; height: auto; position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;');
+    thumbnail.setAttribute('style',
+         'max-height: 100%;'
+      + ' max-width: 100%;'
+      + ' width: auto;'
+      + ' height: auto;'
+      + ' position: absolute;'
+      + ' top: 0;'
+      + ' bottom: 0;'
+      + ' left: 0;'
+      + ' right: 0;'
+      + ' margin: auto;'
+    );
     var caption = document.createElement("span");
     box.appendChild(caption);
-    caption.setAttribute('style', 'position: absolute; bottom: 0; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.4);');
     caption.innerHTML = this.caption;
+    caption.setAttribute('style',
+         'position: absolute;'
+      + ' bottom: 0;'
+      + ' left: 0;'
+      + ' right: 0;'
+      + ' text-align: center;'
+      + ' color: white;'
+      + ' background: rgba(0,0,0,0.4);'
+    );
     return box;
   }
 }
@@ -252,7 +280,27 @@ function markerClusterIconCreate(cluster) {
   var outerRadius = innerRadius + outerOffset;
   var outerSize = 2 * outerRadius;
 
-  return new L.DivIcon({ html: '<div class="marker-cluster-outer" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + outerRadius + 'px; background-color: hsla(' + redToGreen + ', 100%, 50%, 0.6);"><div class="marker-cluster-inner" style="width: ' + innerSize + 'px; height: ' + innerSize + 'px; border-radius: ' + innerRadius + 'px;"><span style="line-height: ' + innerSize + 'px;">' + childCount + '</span></div></div>', className: '', iconSize: new L.Point(outerSize, outerSize) });
+  return new L.DivIcon( {
+    html :  ' <div class="" style="box-sizing: initial;'
+          + ' width: ' + innerSize + 'px;'
+          + ' height: ' + innerSize + 'px;'
+          + ' background-clip: padding-box;'
+          + ' padding: 5px;'
+          + ' border-radius: ' + outerRadius + 'px;'
+          + ' background-color: hsla(' + redToGreen + ', 100%, 50%, 0.8);">'
+
+          + ' <div class="" style="box-sizing: initial;'
+          + ' font: 12px Helvetica Neue, Arial, Helvetica, sans-serif;'
+          + ' text-align: center;'
+          + ' width: ' + innerSize + 'px;'
+          + ' height: ' + innerSize + 'px;'
+          + ' border-radius: ' + innerRadius + 'px;'
+          + ' background-color: rgba(255, 255, 255, 0.7);">'
+          + ' <span style="line-height: ' + innerSize + 'px;">' + childCount + '</span>'
+          + '</div></div>',
+    className : '',
+    iconSize : new L.Point(outerSize, outerSize)
+  } );
 }
 
 function main(pin_dtos, from, to) {
