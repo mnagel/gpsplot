@@ -7,11 +7,19 @@ Display on a map where your photos were taken.
 
 
 
+Live Demo
+=========
+
+A live demo can be found at [http://gpsplot-demo.lettink.de/](http://gpsplot-demo.lettink.de/)
+
+
+
 Screenshot
 ==========
 
 ![gpsplot screenshot](https://raw.githubusercontent.com/mnagel/gpsplot/master/doc/gpsplot.png "gpsplot screenshot")
 
+Photography: (c) Dietmar Rabich, [rabich.de](rabich.de), CC BY-SA 4.0, Wikimedia Commons.
 
 
 Features
@@ -27,6 +35,7 @@ Features
 
 * local preprocessing in python
 * browser-based javascript runtime
+* tested on Linux and Windows
 * optional go server
 * images are *not* uploaded to the cloud
 
@@ -46,6 +55,20 @@ Usage
 * place all pictures you want to plot in `./data/img/`
 * run the python program to create the html page: `python preproc.py`
 * open the resulting `index.html` in your browser
+
+
+
+Used Libraries
+==============
+
+* Leaflet: [https://github.com/Leaflet/Leaflet](https://github.com/Leaflet/Leaflet)
+* Leaflet Markercluster: [https://github.com/Leaflet/Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster)
+* Lightbox: [https://github.com/lokesh/lightbox2/](https://github.com/lokesh/lightbox2/)
+* Flotr2: [https://github.com/HumbleSoftware/Flotr2](https://github.com/HumbleSoftware/Flotr2)
+* Leaflet Heatmap: [https://github.com/Leaflet/Leaflet.heat](https://github.com/Leaflet/Leaflet.heat)
+* date.format: [https://github.com/jacwright/date.format](https://github.com/jacwright/date.format)
+* jQuery: [https://github.com/jquery/jquery](https://github.com/jquery/jquery)
+
 
 
 License
