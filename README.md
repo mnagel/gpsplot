@@ -17,7 +17,7 @@ A live demo can be found at [http://gpsplot-demo.lettink.de/](http://gpsplot-dem
 Screenshot
 ==========
 
-![gpsplot screenshot](https://raw.githubusercontent.com/mnagel/gpsplot/master/doc/gpsplot.png "gpsplot screenshot")
+![gpsplot screenshot](doc/gpsplot.png?raw=true "gpsplot screenshot")
 
 Photography: (c) Dietmar Rabich, [rabich.de](rabich.de), CC BY-SA 4.0, Wikimedia Commons.
 
