@@ -26,6 +26,7 @@ import errno
 import hashlib
 from PIL import Image, ExifTags
 import json
+import logging
 import os
 import re
 import sys
@@ -41,7 +42,7 @@ def read_arguments(args):
     parser.add_argument('--showatzero', default=False, action="store_true", help='regard lat,log = 0,0 as valid coordinate pair')
     parser.add_argument('--useheuristicgps', default=False, action="store_true", help='use coordinates of previous picture if no valid coordinates are found')
     parser.add_argument('--allfileextensions', default=False, action="store_true", help='scan all files for exif data, do not restrict to jpeg files')
-    parser.add_argument('--verboseness', default=0, type=int, help='increase this value to show more messages')
+    parser.add_argument('--verbose', default=False, action="store_true", help='show more log messages')
 
     options = parser.parse_args(args)
     return options
@@ -106,7 +107,7 @@ class ExifImage(object):
                 return False
             return True
         except Exception as e:
-            print("{}: {}".format(self.fn, e))
+            logging.exception("Failed to parse GPS info in %s", self.fn)
             return False
 
     def set_heuristic_gps(self, gps_coords):
@@ -156,7 +157,7 @@ class ExifImage(object):
 
     def create_thumbnail(self, basedir, size):
         if self.get_thumbpath(basedir) == self.fn:
-            print >>sys.stderr, "skipping as you are about to overwrite your input data at %s" % self.fn
+            logging.error("Skipping thumbnail generation for %s as you are about to overwrite your input data", self.fn)
             return
 
         # generate a correctly rotated thumbnail
@@ -235,12 +236,6 @@ def mkdir_p(path):
             pass
         else: raise
 
-# TODO !!! get rid of ugly options parameter
-# TODO ! use some proper logging here
-def log(msg, options, prio=0):
-    if prio <= options.verboseness:
-        print(msg)
-
 def main(options):
     mkdir_p(options.thumbdir)
 
@@ -252,7 +247,7 @@ def main(options):
     stat_nogps = 0
     stat_heuristic = 0
     stat_exceptions = 0
-    log("create list of %s images. starting to process them now." % len(imagepaths), options, prio=1)
+    logging.info("Processing list of %d images...", len(imagepaths))
 
     heuristic_gps_data = (0,0)
     try:
@@ -261,47 +256,56 @@ def main(options):
                 exif_image = ExifImage(imagepath, options.skipthumbs)
                 if not exif_image.has_gps(showatzero=options.showatzero):
                     if options.useheuristicgps:
-                        print("notice: image {0} uses heuristic GPS data".format(exif_image.fn), file=sys.stderr)
+                        logging.warning("Image %s uses heuristic GPS data", exif_image.fn)
                         exif_image.set_heuristic_gps(heuristic_gps_data)
                         stat_heuristic += 1
                     else:
-                        print("notice: image {0} has no EXIF and/or GPS data".format(exif_image.fn), file=sys.stderr)
+                        logging.warning("Image %s has no EXIF and/or GPS data", exif_image.fn)
                         stat_nogps += 1
                         continue
                 heuristic_gps_data = exif_image.gps_coords()
 
                 if not exif_image.has_date():
-                    print("notice: image {0} uses fake timestamp data".format(exif_image.fn), file=sys.stderr)
+                    logging.warning("Image %s uses fake timestamp data", exif_image.fn)
                     exif_image.set_heuristic_timestamp(None)
 
                 dto = exif_image_to_dto(exif_image, options.thumbdir)
                 dtos.append(dto)
                 stat_output += 1
-                log("added image %s" % exif_image.fn, options, prio=1)
+                logging.debug("Added image %s" % exif_image.fn)
                 if not options.skipthumbs:
                     exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
             except Exception as exc:
-                print("single picture exception in %s:\n%s at %s" % (imagepath, exc, traceback.format_exc()), file=sys.stderr)
+                logging.exception("Single picture exception on %s")
                 stat_exceptions += 1
     except KeyboardInterrupt as exc:
         # we stop the image processing, but still continue with the program.
         # this way long-running preproc runs can be stopped and partial results can still be used.
-        log("Doing partial JSON writeout after KeyboardInterrupt.", options)
+        logging.warning("Doing partial JSON writeout after KeyboardInterrupt.", options)
 
-    print("%d -> %d/%d/%d/%d/%d (input -> output/heuristic/nogps/skipped/error)" % (
+    logging.info("%d -> %d/%d/%d/%d/%d (input -> output/heuristic/nogps/skipped/error)",
         stat_input,
         stat_output,
         stat_heuristic,
         stat_nogps,
         stat_input - (stat_output+stat_nogps+stat_exceptions),
         stat_exceptions
-        )
     )
 
     fill_template(outfile=options.outfile, dtos=dtos)
 
-    print("preprocessing done, open file://%s" % os.path.abspath(options.outfile + "/../../index.html"))
+    logging.info("Preprocessing done, open file://%s" % os.path.abspath(options.outfile + "/../../index.html"))
 
 if __name__ == '__main__':
     options = read_arguments(sys.argv[1:])
+
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
+
+    stdout = logging.StreamHandler(sys.stdout)
+    stdout.setFormatter(formatter)
+
+    logger = logging.getLogger()
+    logger.addHandler(stdout)
+    logger.setLevel(logging.INFO if not options.verbose else logging.DEBUG)
+
     main(options)
