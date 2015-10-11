@@ -34,7 +34,7 @@ import traceback
 
 def read_arguments(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--datafile', default='data/img', type=str, help='display pictures from this folder on the map')
+    parser.add_argument('--inputdir', default='data/img', type=str, help='display pictures from this folder on the map')
     parser.add_argument('--skipthumbs', default=False, action="store_true", help='skip thumbnail generation')
     parser.add_argument('--thumbdir', default='data/thumbs', type=str, help='write generated thumbnails to this folder')
     parser.add_argument('--thumbsize', default=160, type=int, help='scale thumbnail to fit within a XXX-by-XXX box')
@@ -241,7 +241,7 @@ def main(options):
 
     dtos = []
 
-    imagepaths = find_images(options.datafile, allfileextensions=options.allfileextensions)
+    imagepaths = find_images(options.inputdir, allfileextensions=options.allfileextensions)
     stat_input = len(imagepaths)
     stat_output = 0
     stat_nogps = 0
