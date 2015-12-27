@@ -32,40 +32,61 @@ import re
 import sys
 import traceback
 
+
 def read_arguments(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--inputdir', default='data/img', type=str, help='display pictures from this folder on the map')
-    parser.add_argument('--skipthumbs', default=False, action="store_true", help='skip thumbnail generation')
-    parser.add_argument('--thumbdir', default='data/thumbs', type=str, help='write generated thumbnails to this folder')
-    parser.add_argument('--thumbsize', default=160, type=int, help='scale thumbnail to fit within a XXX-by-XXX box')
-    parser.add_argument('--outfile', default='data/pins.js', type=str, help='save the generated JSON data needed at runtime to this file')
-    parser.add_argument('--showatzero', default=False, action="store_true", help='regard lat,log = 0,0 as valid coordinate pair')
-    parser.add_argument('--useheuristicgps', default=False, action="store_true", help='use coordinates of previous picture if no valid coordinates are found')
-    parser.add_argument('--allfileextensions', default=False, action="store_true", help='scan all files for exif data, do not restrict to jpeg files')
-    parser.add_argument('--verbose', default=False, action="store_true", help='show more log messages')
+    parser.add_argument('--inputdir', default='data/img', type=str,
+                        help='display pictures from this folder on the map')
+    parser.add_argument('--skipthumbs', default=False, action="store_true",
+                        help='skip thumbnail generation')
+    parser.add_argument('--thumbdir', default='data/thumbs', type=str,
+                        help='write generated thumbnails to this folder')
+    parser.add_argument('--thumbsize', default=160, type=int,
+                        help='scale thumbnail to fit within a XXX-by-XXX box')
+    parser.add_argument('--outfile', default='data/pins.js', type=str,
+                        help='save the generated JSON data needed at runtime to this file')
+    parser.add_argument('--showatzero', default=False, action="store_true",
+                        help='regard lat,log = 0,0 as valid coordinate pair')
+    parser.add_argument('--useheuristicgps', default=False, action="store_true",
+                        help='use coordinates of previous picture if no valid coordinates are found')
+    parser.add_argument('--allfileextensions', default=False, action="store_true",
+                        help='scan all files for exif data, do not restrict to jpeg files')
+    parser.add_argument('--verbose', default=False, action="store_true",
+                        help='show more log messages')
 
     options = parser.parse_args(args)
     return options
 
-# begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
-def degrees(dms):
-    '''Return decimal degrees from degree, minute, second tuple.
 
-    Each item in the tuple is itself a two-item tuple of a
-    numerator and a denominator.'''
+# begin http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
+# noinspection PyShadowingBuiltins
+def degrees(dms):
+    """Return decimal degrees from degree, minute, second tuple.
+
+    Each item in the tuple is itself a two-item tuple of a numerator and a denominator.
+    @param dms: degree, minute, second tuple
+
+    """
 
     deg, min, sec = dms
-    deg = float(deg[0])/deg[1]
-    min = float(min[0])/min[1]
-    sec = float(sec[0])/sec[1]
-    return deg + min/60 + sec/3600
+    deg = float(deg[0]) / deg[1]
+    min = float(min[0]) / min[1]
+    sec = float(sec[0]) / sec[1]
+    return deg + min / 60 + sec / 3600
 
+
+# noinspection PyPep8Naming
 def coord_pair(gps):
-    'Return the latitude, longitude pair from GPS EXIF data.'
+    """Return the latitude, longitude pair from GPS EXIF data.
 
-# Magic GPS EXIF numbers.
-    LATREF = 1; LAT = 2
-    LONGREF = 3; LONG = 4
+    @param gps: exif entry for gps.
+    """
+
+    # Magic GPS EXIF numbers.
+    LATREF = 1
+    LAT = 2
+    LONGREF = 3
+    LONG = 4
 
     lat = degrees(gps[LAT])
     if gps[LATREF] == 'S':
@@ -73,8 +94,9 @@ def coord_pair(gps):
     lon = degrees(gps[LONG])
     if gps[LONGREF] == 'W':
         lon = -lon
-    return (lat, lon)
+    return lat, lon
 # end http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
+
 
 class ExifImage(object):
     # Magic EXIF number.
@@ -89,34 +111,37 @@ class ExifImage(object):
         self.skipthumbs = skipthumbs
         self._heuristic_gps = False
         self._heuristic_timestamp = False
-        self._comment = ''
+        self.comment = ''
         try:
+            # noinspection PyProtectedMember
             self._exif = Image.open(fn)._getexif()
-        except Exception:
+        except RuntimeError:
             self._exif = None
 
     def has_exif(self):
         return self._exif is not None
 
     def has_gps(self, showatzero=False):
+        # noinspection PyBroadException
         try:
             if (not self.has_exif()) or (self._raw_gps() is None):
                 return False
-            x, y = self.gps_coords() # try to actually access them, might fail
+            # noinspection PyUnusedLocal
+            x, y = self.gps_coords()  # try to actually access them, might fail
             if not showatzero and self.is_at_zero():
                 return False
             return True
-        except Exception as e:
+        except Exception:
             logging.exception("Failed to parse GPS info in %s", self.fn)
             return False
 
     def set_heuristic_gps(self, gps_coords):
         self._heuristic_gps = gps_coords
-        self._comment = (self._comment or '') + ' HEURISTIC GPS'
+        self.comment = (self.comment or '') + ' HEURISTIC GPS'
 
     def set_heuristic_timestamp(self, ts):
         self._heuristic_timestamp = ts
-        self._comment = (self._comment or '') + ' HEURISTIC TS'
+        self.comment = (self.comment or '') + ' HEURISTIC TS'
 
     def has_date(self):
         if not self.has_exif:
@@ -135,9 +160,10 @@ class ExifImage(object):
 
     def get_rotation(self):
         std = 1
+        # noinspection PyBroadException
         try:
             return self._exif.get(self._ORIENTATION, std)
-        except Exception as e:
+        except:
             return std
 
     def _raw_gps(self):
@@ -153,7 +179,7 @@ class ExifImage(object):
 
     def size(self):
         im = Image.open(self.fn)
-        return im.size # w, h
+        return im.size  # w, h
 
     def create_thumbnail(self, basedir, size):
         if self.get_thumbpath(basedir) == self.fn:
@@ -184,6 +210,7 @@ class ExifImage(object):
 
         return basedir + '/' + md5_object.hexdigest() + '.jpg'
 
+
 def exif_image_to_dto(input_image, thumbdir):
     gps_coords = input_image.gps_coords()
     size = input_image.size()
@@ -191,21 +218,22 @@ def exif_image_to_dto(input_image, thumbdir):
         'gps': {
             'lat': gps_coords[0],
             'lon': gps_coords[1],
-            },
-        'comment': input_image._comment,
+        },
+        'comment': input_image.comment,
         'image': {
             'url': input_image.fn,
             'height': size[1],
             'width': size[0],
-            'rotation' : input_image.get_rotation(),
-            },
+            'rotation': input_image.get_rotation(),
+        },
         'thumbnail': {
-            'url': input_image.get_thumbpath(thumbdir), # bad bad scope creep
-            },
-        }
+            'url': input_image.get_thumbpath(thumbdir),  # bad bad scope creep
+        },
+    }
     if input_image.get_date():
         result['timestamp'] = input_image.get_date().isoformat()
     return result
+
 
 def find_images(basedir, allfileextensions=False):
     datanames = []
@@ -214,27 +242,30 @@ def find_images(basedir, allfileextensions=False):
     for subdir, dirs, files in os.walk(basedir, followlinks=True):
         dirs.sort()
         files.sort()
-        for file in files:
+        for f in files:
             if not allfileextensions:
-                _, extension = os.path.splitext(file)
+                _, extension = os.path.splitext(f)
                 if not re_jpeg.match(extension):
                     continue
-            datanames.append(os.path.join(subdir, file))
+            datanames.append(os.path.join(subdir, f))
     return datanames
+
 
 def fill_template(outfile, dtos):
     with open(outfile, "w") as text_file:
-        text_file.write("var pin_dtos = {0};".format(json.dumps(dtos, indent=4,
-            separators=(',', ': '))))
+        text_file.write("var pin_dtos = {0};".format(json.dumps(dtos, indent=4, separators=(',', ': '))))
+
 
 def mkdir_p(path):
     # http://stackoverflow.com/a/600612/2536029
     try:
         os.makedirs(path)
-    except OSError as exc: # Python >2.5
+    except OSError as exc:  # Python >2.5
         if exc.errno == errno.EEXIST and os.path.isdir(path):
             pass
-        else: raise
+        else:
+            raise
+
 
 def main(options):
     mkdir_p(options.thumbdir)
@@ -249,9 +280,10 @@ def main(options):
     stat_exceptions = 0
     logging.info("Processing list of %d images...", len(imagepaths))
 
-    heuristic_gps_data = (0,0)
+    heuristic_gps_data = (0, 0)
     try:
         for imagepath in imagepaths:
+            # noinspection PyBroadException
             try:
                 exif_image = ExifImage(imagepath, options.skipthumbs)
                 if not exif_image.has_gps(showatzero=options.showatzero):
@@ -275,29 +307,29 @@ def main(options):
                 logging.debug("Added image %s" % exif_image.fn)
                 if not options.skipthumbs:
                     exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
-            except Exception as exc:
+            except Exception:
                 logging.exception("Single picture exception on %s")
                 stat_exceptions += 1
-    except KeyboardInterrupt as exc:
+    except KeyboardInterrupt:
         # we stop the image processing, but still continue with the program.
         # this way long-running preproc runs can be stopped and partial results can still be used.
         logging.warning("Doing partial JSON writeout after KeyboardInterrupt.", options)
 
     logging.info("%d -> %d/%d/%d/%d/%d (input -> output/heuristic/nogps/skipped/error)",
-        stat_input,
-        stat_output,
-        stat_heuristic,
-        stat_nogps,
-        stat_input - (stat_output+stat_nogps+stat_exceptions),
-        stat_exceptions
-    )
+                 stat_input,
+                 stat_output,
+                 stat_heuristic,
+                 stat_nogps,
+                 stat_input - (stat_output + stat_nogps + stat_exceptions),
+                 stat_exceptions
+                 )
 
     fill_template(outfile=options.outfile, dtos=dtos)
 
     logging.info("Preprocessing done, open file://%s" % os.path.abspath(options.outfile + "/../../index.html"))
 
 if __name__ == '__main__':
-    options = read_arguments(sys.argv[1:])
+    myoptions = read_arguments(sys.argv[1:])
 
     formatter = logging.Formatter('%(asctime)s - %(message)s')
 
@@ -306,6 +338,6 @@ if __name__ == '__main__':
 
     logger = logging.getLogger()
     logger.addHandler(stdout)
-    logger.setLevel(logging.INFO if not options.verbose else logging.DEBUG)
+    logger.setLevel(logging.INFO if not myoptions.verbose else logging.DEBUG)
 
-    main(options)
+    main(myoptions)
