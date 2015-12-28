@@ -29,11 +29,13 @@ import json
 import logging
 import os
 import re
+import shutil
 import sys
 import traceback
 
 
 def read_arguments(args):
+    os.environ['COLUMNS'] = str(shutil.get_terminal_size().columns)
     parser = argparse.ArgumentParser()
     parser.add_argument('--inputdir', default='data/img', type=str,
                         help='display pictures from this folder on the map')
