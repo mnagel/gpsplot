@@ -131,7 +131,6 @@ class ExifImage(object):
         #    logging.exception("Failed to parse GPS info in %s", self.fn)
         return False
 
-
     def has_date(self):
         # noinspection PyBroadException
         try:
@@ -193,13 +192,18 @@ class ExifImage(object):
         image.save(self.get_thumbpath(basedir), 'JPEG', quality=98)
 
     def get_thumbpath(self, basedir):
-        if self.skipthumbs:
-            return self.fn
+        try:
+            if self.skipthumbs:
+                return self.fn
 
-        md5_object = hashlib.md5()
-        md5_object.update(self.fn.encode("utf-8"))
+            md5_object = hashlib.md5()
+            logger.debug(self.fn)
+            md5_object.update(self.fn.encode("utf-8"))
 
-        return basedir + '/' + md5_object.hexdigest() + '.jpg'
+            return basedir + '/' + md5_object.hexdigest() + '.jpg'
+        except UnicodeDecodeError:
+            logging.error("either use python3 or paths without umlauts")
+            sys.exit(1)
 
 
 def exif_image_to_dto(input_image, thumbdir):
