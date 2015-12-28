@@ -47,8 +47,6 @@ def read_arguments(args):
                         help='save the generated JSON data needed at runtime to this file')
     parser.add_argument('--showatzero', default=False, action="store_true",
                         help='regard lat,log = 0,0 as valid coordinate pair')
-    parser.add_argument('--useheuristicgps', default=False, action="store_true",
-                        help='use coordinates of previous picture if no valid coordinates are found')
     parser.add_argument('--allfileextensions', default=False, action="store_true",
                         help='scan all files for exif data, do not restrict to jpeg files')
     parser.add_argument('--verbose', default=False, action="store_true",
@@ -109,8 +107,6 @@ class ExifImage(object):
     def __init__(self, fn, skipthumbs=False):
         self.fn = fn
         self.skipthumbs = skipthumbs
-        self._heuristic_gps = False
-        self._heuristic_timestamp = False
         self.comment = ''
         try:
             # noinspection PyProtectedMember
@@ -124,36 +120,33 @@ class ExifImage(object):
     def has_gps(self, showatzero=False):
         # noinspection PyBroadException
         try:
-            if (not self.has_exif()) or (self._raw_gps() is None):
-                return False
-            # noinspection PyUnusedLocal
-            x, y = self.gps_coords()  # try to actually access them, might fail
+            # endless ways for the data to be completely borken
+            # best way: just access it and watch for errors
+            self.gps_coords()
             if not showatzero and self.is_at_zero():
                 return False
             return True
-        except Exception:
-            logging.exception("Failed to parse GPS info in %s", self.fn)
-            return False
+        except (TypeError, Exception):
+            pass
+        #    logging.exception("Failed to parse GPS info in %s", self.fn)
+        return False
 
-    def set_heuristic_gps(self, gps_coords):
-        self._heuristic_gps = gps_coords
-        self.comment = (self.comment or '') + ' HEURISTIC GPS'
-
-    def set_heuristic_timestamp(self, ts):
-        self._heuristic_timestamp = ts
-        self.comment = (self.comment or '') + ' HEURISTIC TS'
 
     def has_date(self):
-        if not self.has_exif:
-            return False
-        tmp = self._exif.get(self._DATE, None)
-        return tmp is not None
+        # noinspection PyBroadException
+        try:
+            # endless ways for the data to be completely borken
+            # best way: just access it and watch for errors
+            tmp = self._exif.get(self._DATE, None)
+            datetime.strptime(tmp, '%Y:%m:%d %H:%M:%S')
+            return True
+        except (TypeError, Exception):
+            pass
+        #    logging.exception("Failed to parse date info in %s", self.fn)
+        return False
 
     def get_date(self):
-        if self._heuristic_timestamp:
-            inp = self._heuristic_timestamp
-        else:
-            inp = self._exif.get(self._DATE, None)
+        inp = self._exif.get(self._DATE, None)
         if not inp:
             return None
         return datetime.strptime(inp, '%Y:%m:%d %H:%M:%S')
@@ -170,8 +163,6 @@ class ExifImage(object):
         return self._exif.get(self._GPS, None)
 
     def gps_coords(self):
-        if self._heuristic_gps:
-            return self._heuristic_gps
         return coord_pair(self._raw_gps())
 
     def is_at_zero(self):
@@ -212,13 +203,8 @@ class ExifImage(object):
 
 
 def exif_image_to_dto(input_image, thumbdir):
-    gps_coords = input_image.gps_coords()
     size = input_image.size()
     result = {
-        'gps': {
-            'lat': gps_coords[0],
-            'lon': gps_coords[1],
-        },
         'comment': input_image.comment,
         'image': {
             'url': input_image.fn,
@@ -228,10 +214,20 @@ def exif_image_to_dto(input_image, thumbdir):
         },
         'thumbnail': {
             'url': input_image.get_thumbpath(thumbdir),  # bad bad scope creep
-        },
+        }
     }
-    if input_image.get_date():
+
+    if input_image.has_gps():
+        gps_coords = input_image.gps_coords()
+        subdata = {
+            'lat': gps_coords[0],
+            'lon': gps_coords[1],
+        }
+        result['gps'] = subdata
+
+    if input_image.has_date():
         result['timestamp'] = input_image.get_date().isoformat()
+
     return result
 
 
@@ -276,30 +272,20 @@ def main(options):
     stat_input = len(imagepaths)
     stat_output = 0
     stat_nogps = 0
-    stat_heuristic = 0
     stat_exceptions = 0
     logging.info("Processing list of %d images...", len(imagepaths))
 
-    heuristic_gps_data = (0, 0)
     try:
         for imagepath in imagepaths:
             # noinspection PyBroadException
             try:
                 exif_image = ExifImage(imagepath, options.skipthumbs)
                 if not exif_image.has_gps(showatzero=options.showatzero):
-                    if options.useheuristicgps:
-                        logging.warning("Image %s uses heuristic GPS data", exif_image.fn)
-                        exif_image.set_heuristic_gps(heuristic_gps_data)
-                        stat_heuristic += 1
-                    else:
                         logging.warning("Image %s has no EXIF and/or GPS data", exif_image.fn)
                         stat_nogps += 1
-                        continue
-                heuristic_gps_data = exif_image.gps_coords()
 
                 if not exif_image.has_date():
                     logging.warning("Image %s uses fake timestamp data", exif_image.fn)
-                    exif_image.set_heuristic_timestamp(None)
 
                 dto = exif_image_to_dto(exif_image, options.thumbdir)
                 dtos.append(dto)
@@ -315,10 +301,9 @@ def main(options):
         # this way long-running preproc runs can be stopped and partial results can still be used.
         logging.warning("Doing partial JSON writeout after KeyboardInterrupt.")
 
-    logging.info("%d -> %d/%d/%d/%d/%d (input -> output/heuristic/nogps/skipped/error)",
+    logging.info("%d -> %d/%d/%d/%d (input -> output/nogps/skipped/error)",
                  stat_input,
                  stat_output,
-                 stat_heuristic,
                  stat_nogps,
                  stat_input - (stat_output + stat_nogps + stat_exceptions),
                  stat_exceptions

@@ -229,12 +229,30 @@ function plotToLayer(what, layer) {
   return marker;
 }
 
+var heuristic_last_good_lat = 0;
+var heuristic_last_good_lon = 0;
+
 function dto_to_pin(dto) {
   var datevalue = dto.timestamp ? new Date(dto.timestamp) : undefined;
+  var comment = dto.comment;
 
-  return new Pin(dto.gps.lat, dto.gps.lon, {
+  if (!dto.gps) {
+    console.log("using heuristic gps for " + (dto.url ? dto.url : (dto.image ? dto.image.url : "unknown things")));
+    var latvalue = heuristic_last_good_lat;
+    var lonvalue = heuristic_last_good_lon;
+    comment += " HEURISTIC GPS";
+  }
+  else {
+    var latvalue = dto.gps.lat;
+    heuristic_last_good_lat = latvalue;
+
+    var lonvalue = dto.gps.lon;
+    heuristic_last_good_lon = lonvalue;
+  }
+
+  return new Pin(latvalue, lonvalue, {
                   date: datevalue,
-                  comment: dto.comment,
+                  comment: comment,
                   url: dto.url ? dto.url : (dto.image ? dto.image.url : undefined),
                   exifrotation: dto.image ? dto.image.rotation : undefined,
                   thumbnail: dto.thumbnail ?
@@ -243,7 +261,7 @@ function dto_to_pin(dto) {
                       dto.image ? dto.image.height : 80,
                       dto.image ? dto.image.width : 80,
                       (dto.thumbnail && dto.image) ? (dto.thumbnail.url + '?imagePath=' + dto.image.url) : (dto.thumbnail ? dto.thumbnail.url : undefined),
-                      datevalue ? safeDateFormat(datevalue) : (dto.comment ? dto.comment : '&nbsp;')
+                      datevalue ? safeDateFormat(datevalue) : (comment ? comment : '&nbsp;')
                     ) : undefined
             });
 }
