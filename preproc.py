@@ -39,8 +39,21 @@ def read_arguments(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--inputdir', default='data/img', type=str,
                         help='display pictures from this folder on the map')
-    parser.add_argument('--skipthumbs', default=False, action="store_true",
-                        help='skip thumbnail generation')
+
+    generate_thumbnails_parser = parser.add_mutually_exclusive_group(required=False)
+    generate_thumbnails_parser.add_argument('--generate-thumbnails', dest='generatethumbs', action='store_true',
+                                            help='enable creation of thumbnails for all pictures to "--thumbdir XXX"')
+    generate_thumbnails_parser.add_argument('--no-generate-thumbnails', dest='generatethumbs', action='store_false',
+                                            help='skip creation of thumbnails. also see --reference-thumbnails')
+    parser.set_defaults(generatethumbs=True)
+
+    reference_thumbnails_parser = parser.add_mutually_exclusive_group(required=False)
+    reference_thumbnails_parser.add_argument('--reference-thumbnails', dest='referencethumbs', action='store_true',
+                                             help='use thumbnails instead of full-size images at certain places.')
+    reference_thumbnails_parser.add_argument('--no-reference-thumbnails', dest='referencethumbs', action='store_false',
+                                             help='force usage if full-size images.')
+    parser.set_defaults(referencethumbs=True)
+
     parser.add_argument('--thumbdir', default='data/thumbs', type=str,
                         help='write generated thumbnails to this folder')
     parser.add_argument('--thumbsize', default=160, type=int,
@@ -106,9 +119,9 @@ class ExifImage(object):
         if ExifTags.TAGS[_ORIENTATION] == 'Orientation':
             break
 
-    def __init__(self, fn, skipthumbs=False):
+    def __init__(self, fn, referencethumb):
         self.fn = fn
-        self.skipthumbs = skipthumbs
+        self.referencethumb = referencethumb
         self.comment = ''
         try:
             # noinspection PyProtectedMember
@@ -194,10 +207,9 @@ class ExifImage(object):
         image.save(self.get_thumbpath(basedir), 'JPEG', quality=98)
 
     def get_thumbpath(self, basedir):
+        if not self.referencethumb:
+            return self.fn
         try:
-            if self.skipthumbs:
-                return self.fn
-
             md5_object = hashlib.md5()
             logger.debug(self.fn)
             md5_object.update(self.fn.encode("utf-8"))
@@ -270,7 +282,8 @@ def mkdir_p(path):
 
 
 def main(options):
-    mkdir_p(options.thumbdir)
+    if options.generatethumbs:
+        mkdir_p(options.thumbdir)
 
     dtos = []
 
@@ -285,7 +298,7 @@ def main(options):
         for imagepath in imagepaths:
             # noinspection PyBroadException
             try:
-                exif_image = ExifImage(imagepath, options.skipthumbs)
+                exif_image = ExifImage(imagepath, options.referencethumbs)
                 if not exif_image.has_gps(showatzero=options.showatzero):
                         logging.warning("Image %s has no EXIF and/or GPS data", exif_image.fn)
                         stat_nogps += 1
@@ -297,7 +310,7 @@ def main(options):
                 dtos.append(dto)
                 stat_output += 1
                 logging.debug("Added image %s" % exif_image.fn)
-                if not options.skipthumbs:
+                if options.generatethumbs:
                     exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
             except Exception:
                 logging.exception("Single picture exception on %s" % imagepath)
