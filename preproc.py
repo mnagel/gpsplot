@@ -308,12 +308,12 @@ def main(options):
                 if not options.skipthumbs:
                     exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
             except Exception:
-                logging.exception("Single picture exception on %s")
+                logging.exception("Single picture exception on %s" % imagepath)
                 stat_exceptions += 1
     except KeyboardInterrupt:
         # we stop the image processing, but still continue with the program.
         # this way long-running preproc runs can be stopped and partial results can still be used.
-        logging.warning("Doing partial JSON writeout after KeyboardInterrupt.", options)
+        logging.warning("Doing partial JSON writeout after KeyboardInterrupt.")
 
     logging.info("%d -> %d/%d/%d/%d/%d (input -> output/heuristic/nogps/skipped/error)",
                  stat_input,
