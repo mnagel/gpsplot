@@ -305,7 +305,7 @@ def main(options):
                  stat_input,
                  stat_output,
                  stat_nogps,
-                 stat_input - (stat_output + stat_nogps + stat_exceptions),
+                 stat_input - (stat_output + stat_exceptions),
                  stat_exceptions
                  )
 
