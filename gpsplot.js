@@ -242,10 +242,11 @@ function plotToLayer(what, layer) {
 var heuristic_last_good_lat = 0;
 var heuristic_last_good_lon = 0;
 
-function TrailElement(ts, lat, lon) {
+function TrailElement(ts, lat, lon, comment) {
     this.ts = ts;
     this.lat = lat;
     this.lon = lon;
+    this.comment = comment;
 }
 
 function heuristic_gps_magic(dto, pin, trail) {
@@ -269,7 +270,7 @@ function heuristic_gps_magic(dto, pin, trail) {
                 bestTrailElement = trail[i];
             }
         }
-        pin.comment += " HEURISTIC GPS based on Trail at " + safeDateFormat(bestTrailElement.ts);
+        pin.comment += " HEURISTIC GPS based on Trail " + bestTrailElement.comment + " at " + safeDateFormat(bestTrailElement.ts);
         pin.lat = bestTrailElement.lat;
         pin.lon = bestTrailElement.lon;
         heuristic_last_good_lat = pin.lat;
@@ -389,6 +390,52 @@ function main(pin_dtos, from, to) {
 
     global_allpins = pins;
     heatmapLayer.setData({data: pins});
+
+    map.on('click', onMapClick);
+}
+
+global_trailstring = "";
+global_traillatlon = "";
+global_traildate = new Date();
+
+function addToTrail() {
+    global_trailstring = global_trailstring + 'new TrailElement(new Date("' + $('#date_jit').val() + ':00"), ' +
+        global_traillatlon.lat + ', ' + global_traillatlon.lng + ', "' + $('#date_cmt').val() + '"), <br/>';
+    $('#trailresult').html (global_trailstring);
+    global_traildate = $('#date_jit').val();
+}
+
+function onMapClick(e) {
+    var control = document.createElement("div");
+    control.innerHTML = `
+        <h2>Create Your Own Trail</h2>
+        <input type="text" id="date_jit" value="">
+        <input type="button" id="btn_generate" value="Pick A Date">
+        <input type="text" id="date_cmt" value="no comment">
+        <h1><button onclick="addToTrail()">Add To Trail</button></h1>
+        Your Trail is:
+        <br />
+        <div id="trailresult"></div>
+    `
+
+    var popup = L.popup();
+    global_traillatlon = e.latlng;
+    popup.setLatLng(e.latlng).setContent(control).openOn(map);
+
+    $('#btn_generate').click(function(){
+        $('#date_jit').appendDtpicker({
+            "onInit": function(handler){
+                handler.setDate(global_traildate);
+                handler.show();
+            },
+            "onHide": function(handler){
+                global_traildate = handler.getDate();
+                handler.destroy();
+            },
+            "dateFormat": "yyyy-MM-DDThh:mm",
+            "current": global_traildate
+        });
+    });
 }
 
 function filterPinList(pins, from, to) {
