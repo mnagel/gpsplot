@@ -146,11 +146,13 @@ function Thumbnail(height, width, url, caption, pindex) {
 function Pin(lat, lon, aux, pindex) {
   this.lat = lat;
   this.lon = lon;
+  this.tag = "";
   this.date = aux.date;
   this.comment = aux.comment;
   this.url = aux.url;
   this.rotation = aux.exifrotation;
   this.thumbnail = aux.thumbnail;
+  this.dotfileinfo = aux.dotfileinfo;
   this.pindex = pindex;
 }
 
@@ -252,8 +254,17 @@ function TrailElement(ts, lat, lon, comment) {
 function heuristic_gps_magic(dto, pin, trail) {
     if (dto.gps) {
         console.log("using real gps data");
+        pin.tag += " EMBEDDED GPS";
         pin.lat = dto.gps.lat;
         pin.lon = dto.gps.lon;
+        heuristic_last_good_lat = pin.lat;
+        heuristic_last_good_lon = pin.lon;
+    }
+    else if (dto.dotfileinfo && dto.dotfileinfo.gps) {
+        console.log("using dotfile gps data");
+        pin.tag += " DOTFILE GPS";
+        pin.lat = dto.dotfileinfo.gps.lat;
+        pin.lon = dto.dotfileinfo.gps.lon;
         heuristic_last_good_lat = pin.lat;
         heuristic_last_good_lon = pin.lon;
     }
@@ -276,7 +287,7 @@ function heuristic_gps_magic(dto, pin, trail) {
                 bestTrailElement = trail[i];
             }
         }
-        pin.comment += " HEURISTIC GPS based on Trail " + bestTrailElement.comment + " at " + safeDateFormat(bestTrailElement.ts);
+        pin.tag += " TRAIL-HEURISTIC GPS based on Trail " + bestTrailElement.comment + " at " + safeDateFormat(bestTrailElement.ts);
         // prevent clusters from being inseparable
         var clusterfuzzer = pin.pindex/5000000;
         clusterfuzzer = 0;
@@ -287,6 +298,7 @@ function heuristic_gps_magic(dto, pin, trail) {
     }
     else {
         console.log("using previous gps data");
+        pin.tag += " REPEATER-HEURISTIC GPS";
         pin.lat = heuristic_last_good_lat;
         pin.lon = heuristic_last_good_lon;
     }
@@ -301,9 +313,10 @@ function dto_to_pin(dto, pindex, alldtos) {
     comment: comment,
     url: dto.url ? dto.url : (dto.image ? dto.image.url : undefined),
     exifrotation: dto.image ? dto.image.rotation : undefined,
-    undefined
+    dotfileinfo: dto.dotfileinfo
     };
   var pin = new Pin(0, 0, aux, pindex);
+  heuristic_gps_magic(dto, pin, typeof trail !== 'undefined' ? trail : []);
   var thumbnail = dto.thumbnail ?
                     new Thumbnail(
                       // TODO this is senseless mixing of image/thumb
@@ -314,7 +327,6 @@ function dto_to_pin(dto, pindex, alldtos) {
                       pindex
                     ) : undefined;
   pin.thumbnail = thumbnail;
-  heuristic_gps_magic(dto, pin, typeof trail !== 'undefined' ? trail : []);
   return pin;
 }
 

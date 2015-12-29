@@ -78,7 +78,6 @@ def degrees(dms):
 
     Each item in the tuple is itself a two-item tuple of a numerator and a denominator.
     @param dms: degree, minute, second tuple
-
     """
 
     deg, min, sec = dms
@@ -165,6 +164,17 @@ class ExifImage(object):
             return None
         return datetime.strptime(inp, '%Y:%m:%d %H:%M:%S')
 
+    def get_dotfilepath(self):
+        return os.path.dirname(self.fn) + "/.gpsplot"
+
+    def has_dotfileinfo(self):
+        return os.path.isfile(self.get_dotfilepath())
+
+    def get_dotfileinfo(self):
+        with open(self.get_dotfilepath()) as json_file:
+            json_data = json.load(json_file)
+            return json_data
+
     def get_rotation(self):
         std = 1
         # noinspection PyBroadException
@@ -245,6 +255,9 @@ def exif_image_to_dto(input_image, thumbdir):
 
     if input_image.has_date():
         result['timestamp'] = input_image.get_date().isoformat()
+
+    if input_image.has_dotfileinfo():
+        result['dotfileinfo'] = input_image.get_dotfileinfo()
 
     return result
 
