@@ -257,6 +257,12 @@ function heuristic_gps_magic(dto, pin, trail) {
         heuristic_last_good_lat = pin.lat;
         heuristic_last_good_lon = pin.lon;
     }
+    else if (typeof pin.date === "undefined") {
+        // place pictures with no usable timestamp in the ocean
+        console.log("using hardcoded fallback");
+        pin.lat = 0;
+        pin.lon = 65;
+    }
     else if (trail.length > 0) {
         console.log("using time correlated gps data");
         var arrayLength = trail.length;
