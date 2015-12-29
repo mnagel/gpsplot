@@ -277,8 +277,11 @@ function heuristic_gps_magic(dto, pin, trail) {
             }
         }
         pin.comment += " HEURISTIC GPS based on Trail " + bestTrailElement.comment + " at " + safeDateFormat(bestTrailElement.ts);
-        pin.lat = bestTrailElement.lat;
-        pin.lon = bestTrailElement.lon;
+        // prevent clusters from being inseparable
+        var clusterfuzzer = pin.pindex/5000000;
+        clusterfuzzer = 0;
+        pin.lat = bestTrailElement.lat + clusterfuzzer;
+        pin.lon = bestTrailElement.lon + clusterfuzzer;
         heuristic_last_good_lat = pin.lat;
         heuristic_last_good_lon = pin.lon;
     }
