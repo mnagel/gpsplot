@@ -83,7 +83,14 @@ function scaleIntoBox(x, y, boxsize) {
   return [x*scale, y*scale];
 }
 
-function Thumbnail(height, width, url, caption) {
+// this method is called when right-clicking a thumbnail and exists for q&d debugging purposes...
+var global_allpins = "not_yet_debugging";
+function gpsplot_debug_hook(pindex) {
+    console.log(global_allpins[pindex]);
+    return false; // do not show real popup
+}
+
+function Thumbnail(height, width, url, caption, pindex) {
   this.height = height;
   this.width = width;
   this.url = url;
@@ -91,6 +98,8 @@ function Thumbnail(height, width, url, caption) {
 
   this.createElement = function() {
     var box = document.createElement("div");
+    // inject some code to aide debugging
+    box.setAttribute('oncontextmenu', "javascript:return gpsplot_debug_hook(" + pindex +");");
     box.setAttribute('style',
          'width: ' + THUMBSIZE + 'px;'
       + ' height: ' + THUMBSIZE + 'px;'
@@ -134,7 +143,7 @@ function Thumbnail(height, width, url, caption) {
   }
 }
 
-function Pin(lat, lon, aux) {
+function Pin(lat, lon, aux, pindex) {
   this.lat = lat;
   this.lon = lon;
   this.date = aux.date;
@@ -142,6 +151,7 @@ function Pin(lat, lon, aux) {
   this.url = aux.url;
   this.rotation = aux.exifrotation;
   this.thumbnail = aux.thumbnail;
+  this.pindex = pindex;
 }
 
 function compareMarkers(a, b) {
@@ -232,38 +242,70 @@ function plotToLayer(what, layer) {
 var heuristic_last_good_lat = 0;
 var heuristic_last_good_lon = 0;
 
-function dto_to_pin(dto) {
+function TrailElement(ts, lat, lon) {
+    this.ts = ts;
+    this.lat = lat;
+    this.lon = lon;
+}
+
+function heuristic_gps_magic(dto, pin, trail) {
+    if (dto.gps) {
+        console.log("using real gps data");
+        pin.lat = dto.gps.lat;
+        pin.lon = dto.gps.lon;
+        heuristic_last_good_lat = pin.lat;
+        heuristic_last_good_lon = pin.lon;
+    }
+    else if (trail.length > 0) {
+        console.log("using time correlated gps data");
+        var arrayLength = trail.length;
+        var bestTrailElement = trail[0];
+        // TODO: this is basically len(trail)*len(pins) and could possibly benefit from sorting or other optimization
+        for (var i = 0; i < arrayLength; i++) {
+            if (trail[i].ts > pin.date) {
+                break;
+            }
+            else {
+                bestTrailElement = trail[i];
+            }
+        }
+        pin.comment += " HEURISTIC GPS based on Trail at " + safeDateFormat(bestTrailElement.ts);
+        pin.lat = bestTrailElement.lat;
+        pin.lon = bestTrailElement.lon;
+        heuristic_last_good_lat = pin.lat;
+        heuristic_last_good_lon = pin.lon;
+    }
+    else {
+        console.log("using previous gps data");
+        pin.lat = heuristic_last_good_lat;
+        pin.lon = heuristic_last_good_lon;
+    }
+}
+
+function dto_to_pin(dto, pindex, alldtos) {
   var datevalue = dto.timestamp ? new Date(dto.timestamp) : undefined;
   var comment = dto.comment;
 
-  if (!dto.gps) {
-    console.log("using heuristic gps for " + (dto.url ? dto.url : (dto.image ? dto.image.url : "unknown things")));
-    var latvalue = heuristic_last_good_lat;
-    var lonvalue = heuristic_last_good_lon;
-    comment += " HEURISTIC GPS";
-  }
-  else {
-    var latvalue = dto.gps.lat;
-    heuristic_last_good_lat = latvalue;
-
-    var lonvalue = dto.gps.lon;
-    heuristic_last_good_lon = lonvalue;
-  }
-
-  return new Pin(latvalue, lonvalue, {
+  var pin = new Pin(0, 0, {
                   date: datevalue,
                   comment: comment,
                   url: dto.url ? dto.url : (dto.image ? dto.image.url : undefined),
                   exifrotation: dto.image ? dto.image.rotation : undefined,
-                  thumbnail: dto.thumbnail ?
+                  undefined,
+                  pindex
+            });
+  var thumbnail = dto.thumbnail ?
                     new Thumbnail(
                       // TODO this is senseless mixing of image/thumb
                       dto.image ? dto.image.height : 80,
                       dto.image ? dto.image.width : 80,
                       (dto.thumbnail && dto.image) ? (dto.thumbnail.url + '?imagePath=' + dto.image.url) : (dto.thumbnail ? dto.thumbnail.url : undefined),
-                      datevalue ? safeDateFormat(datevalue) : (comment ? comment : '&nbsp;')
-                    ) : undefined
-            });
+                      datevalue ? safeDateFormat(datevalue) : (comment ? comment : '&nbsp;'),
+                      pindex
+                    ) : undefined;
+  pin.thumbnail = thumbnail;
+  heuristic_gps_magic(dto, pin, typeof trail !== 'undefined' ? trail : []);
+  return pin;
 }
 
 // TODO *cry for help* global state hack
@@ -345,6 +387,7 @@ function main(pin_dtos, from, to) {
     console.log(document.getElementById("histogram"));
     plot_histogram(document.getElementById("histogram"), buckets);
 
+    global_allpins = pins;
     heatmapLayer.setData({data: pins});
 }
 
