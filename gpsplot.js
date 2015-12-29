@@ -197,7 +197,7 @@ function onClusterClick(e) {
     }
     link.setAttribute('data-title',
       '<a href="' + marker.pin.url + '" target="_blank">'
-      + safeDateFormat(marker.pin.date)
+      + get_thumbnail_caption(marker.pin)
       + " " + marker.pin.url
       + " " + marker.pin.comment
       + '</a>'
@@ -206,7 +206,7 @@ function onClusterClick(e) {
     if (marker.pin.thumbnail) {
       link.appendChild(marker.pin.thumbnail.createElement());
     } else {
-      link.innerHTML = '<div>' + safeDateFormat(marker.pin.date) + ': ' + marker.pin.comment + '</div>';
+      link.innerHTML = '<div>' + get_thumbnail_caption(marker.pin) + ': ' + marker.pin.comment + '</div>';
     }
     box.appendChild(link);
   });
@@ -304,6 +304,21 @@ function heuristic_gps_magic(dto, pin, trail) {
     }
 }
 
+function tag_to_icon(tag) {
+    if (/.*EMBEDDED.*/.test(tag)) {
+        return '&#x2600;';
+    }
+    if (/.*DOTFILE.*/.test(tag)) {
+        return '&#x270e;';
+    }
+
+    return '&#x2718;';
+}
+
+function get_thumbnail_caption(pin) {
+    return tag_to_icon(pin.tag) + ' ' + (pin.date ? safeDateFormat(pin.date) : (pin.comment ? pin.comment : '&nbsp;'));
+}
+
 function dto_to_pin(dto, pindex, alldtos) {
   var datevalue = dto.timestamp ? new Date(dto.timestamp) : undefined;
   var comment = dto.comment;
@@ -323,7 +338,7 @@ function dto_to_pin(dto, pindex, alldtos) {
                       dto.image ? dto.image.height : 80,
                       dto.image ? dto.image.width : 80,
                       (dto.thumbnail && dto.image) ? (dto.thumbnail.url + '?imagePath=' + dto.image.url) : (dto.thumbnail ? dto.thumbnail.url : undefined),
-                      datevalue ? safeDateFormat(datevalue) : (comment ? comment : '&nbsp;'),
+                      get_thumbnail_caption(pin),
                       pindex
                     ) : undefined;
   pin.thumbnail = thumbnail;
