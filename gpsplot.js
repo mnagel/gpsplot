@@ -287,14 +287,14 @@ function dto_to_pin(dto, pindex, alldtos) {
   var datevalue = dto.timestamp ? new Date(dto.timestamp) : undefined;
   var comment = dto.comment;
 
-  var pin = new Pin(0, 0, {
-                  date: datevalue,
-                  comment: comment,
-                  url: dto.url ? dto.url : (dto.image ? dto.image.url : undefined),
-                  exifrotation: dto.image ? dto.image.rotation : undefined,
-                  undefined,
-                  pindex
-            });
+  var aux = {
+    date: datevalue,
+    comment: comment,
+    url: dto.url ? dto.url : (dto.image ? dto.image.url : undefined),
+    exifrotation: dto.image ? dto.image.rotation : undefined,
+    undefined
+    };
+  var pin = new Pin(0, 0, aux, pindex);
   var thumbnail = dto.thumbnail ?
                     new Thumbnail(
                       // TODO this is senseless mixing of image/thumb
