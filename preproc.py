@@ -348,7 +348,7 @@ def main(options):
 if __name__ == '__main__':
     myoptions = read_arguments(sys.argv[1:])
 
-    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
 
     stdout = logging.StreamHandler(sys.stdout)
     stdout.setFormatter(formatter)
