@@ -85,7 +85,7 @@ function scaleIntoBox(x, y, boxsize) {
 
 // this method is called when right-clicking a thumbnail and exists for q&d debugging purposes...
 var global_allpins = "not_yet_debugging";
-function gpsplot_debug_hook(pindex) {
+function gpsplot_debug_thumbnail(pindex) {
     console.log(global_allpins[pindex]);
     return false; // do not show real popup
 }
@@ -99,7 +99,7 @@ function Thumbnail(height, width, url, caption, pindex) {
   this.createElement = function() {
     var box = document.createElement("div");
     // inject some code to aide debugging
-    box.setAttribute('oncontextmenu', "javascript:return gpsplot_debug_hook(" + pindex +");");
+    box.setAttribute('oncontextmenu', "javascript:return gpsplot_debug_thumbnail(" + pindex +");");
     box.setAttribute('style',
          'width: ' + THUMBSIZE + 'px;'
       + ' height: ' + THUMBSIZE + 'px;'
