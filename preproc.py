@@ -164,14 +164,38 @@ class ExifImage(object):
             return None
         return datetime.strptime(inp, '%Y:%m:%d %H:%M:%S')
 
-    def get_dotfilepath(self):
-        return os.path.dirname(self.fn) + "/.gpsplot"
+    @staticmethod
+    def get_dotfilepath(path):
+        return os.path.dirname(path) + "/.gpsplot"
+
+    @staticmethod
+    def get_parents(path):
+        parents = []
+        path = os.path.normpath(path)
+        path = os.path.dirname(path)
+        while path:
+            parents.append(path)
+            if path == '/':
+                path = ''
+            else:
+                path = os.path.dirname(path)
+
+        return parents
+
+    def get_effective_dotfilepath(self):
+        for parent in ExifImage.get_parents(self.fn):
+            candidate = ExifImage.get_dotfilepath(parent)
+            if os.path.isfile(candidate):
+                return candidate
 
     def has_dotfileinfo(self):
-        return os.path.isfile(self.get_dotfilepath())
+        for parent in ExifImage.get_parents(self.fn):
+            if os.path.isfile(ExifImage.get_dotfilepath(parent)):
+                return True
+        return False
 
     def get_dotfileinfo(self):
-        with open(self.get_dotfilepath()) as json_file:
+        with open(self.get_effective_dotfilepath()) as json_file:
             json_data = json.load(json_file)
             return json_data
 
