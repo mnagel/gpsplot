@@ -90,6 +90,87 @@ function gpsplot_debug_thumbnail(pindex) {
     return false; // do not show real popup
 }
 
+function http_get(url)
+{
+    var req = new XMLHttpRequest();
+    // false for synchronous request
+    req.open("GET", url, false);
+    req.send(null);
+    return req.responseText;
+}
+
+function reverse_geocode(latlon) {
+    var req = ` http://nominatim.openstreetmap.org/reverse?format=json&lat=${latlon.lat}&lon=${latlon.lng}&zoom=18&addressdetails=1`
+    return http_get(req);
+}
+
+function gpsplot_debug_map(leafletevent) {
+    var geocode = reverse_geocode(leafletevent.latlng);
+    geocode = JSON.parse(geocode)
+    console.log(geocode);
+
+    var strink = `
+<pre>
+{
+  "gps" : {
+    "lat" : ${leafletevent.latlng.lat},
+    "lon" : ${leafletevent.latlng.lng},
+    "name": "${geocode.display_name}"
+  }
+}
+</pre>
+    `
+
+    var popup = L.popup();
+    popup.setLatLng(leafletevent.latlng).setContent(strink).openOn(map);
+    return;
+}
+
+global_trailstring = "";
+global_traillatlon = "";
+global_traildate = new Date();
+
+function addToTrail() {
+    global_trailstring = global_trailstring + 'new TrailElement(new Date("' + $('#date_jit').val() + ':00"), ' +
+        global_traillatlon.lat + ', ' + global_traillatlon.lng + ', "' + $('#date_cmt').val() + '"), <br/>';
+    $('#trailresult').html (global_trailstring);
+    global_traildate = $('#date_jit').val();
+}
+
+
+function gpsplot_debug_map_trail(leafletevent) {
+    var control = document.createElement("div");
+    control.innerHTML = `
+        <h2>Create Your Own Trail</h2>
+        <input type="text" id="date_jit" value="">
+        <input type="button" id="btn_generate" value="Pick A Date">
+        <input type="text" id="date_cmt" value="no comment">
+        <h1><button onclick="addToTrail()">Add To Trail</button></h1>
+        Your Trail is:
+        <br />
+        <div id="trailresult"></div>
+    `
+
+    var popup = L.popup();
+    global_traillatlon = leafletevent.latlng;
+    popup.setLatLng(leafletevent.latlng).setContent(control).openOn(map);
+
+    $('#btn_generate').click(function(){
+        $('#date_jit').appendDtpicker({
+            "onInit": function(handler){
+                handler.setDate(global_traildate);
+                handler.show();
+            },
+            "onHide": function(handler){
+                global_traildate = handler.getDate();
+                handler.destroy();
+            },
+            "dateFormat": "yyyy-MM-DDThh:mm",
+            "current": global_traildate
+        });
+    });
+}
+
 function Thumbnail(height, width, url, caption, pindex) {
   this.height = height;
   this.width = width;
@@ -427,51 +508,7 @@ function main(pin_dtos, from, to) {
     global_allpins = pins;
     heatmapLayer.setData({data: pins});
 
-    map.on('click', onMapClick);
-}
-
-global_trailstring = "";
-global_traillatlon = "";
-global_traildate = new Date();
-
-function addToTrail() {
-    global_trailstring = global_trailstring + 'new TrailElement(new Date("' + $('#date_jit').val() + ':00"), ' +
-        global_traillatlon.lat + ', ' + global_traillatlon.lng + ', "' + $('#date_cmt').val() + '"), <br/>';
-    $('#trailresult').html (global_trailstring);
-    global_traildate = $('#date_jit').val();
-}
-
-function onMapClick(e) {
-    var control = document.createElement("div");
-    control.innerHTML = `
-        <h2>Create Your Own Trail</h2>
-        <input type="text" id="date_jit" value="">
-        <input type="button" id="btn_generate" value="Pick A Date">
-        <input type="text" id="date_cmt" value="no comment">
-        <h1><button onclick="addToTrail()">Add To Trail</button></h1>
-        Your Trail is:
-        <br />
-        <div id="trailresult"></div>
-    `
-
-    var popup = L.popup();
-    global_traillatlon = e.latlng;
-    popup.setLatLng(e.latlng).setContent(control).openOn(map);
-
-    $('#btn_generate').click(function(){
-        $('#date_jit').appendDtpicker({
-            "onInit": function(handler){
-                handler.setDate(global_traildate);
-                handler.show();
-            },
-            "onHide": function(handler){
-                global_traildate = handler.getDate();
-                handler.destroy();
-            },
-            "dateFormat": "yyyy-MM-DDThh:mm",
-            "current": global_traildate
-        });
-    });
+    map.on('click', gpsplot_debug_map);
 }
 
 function filterPinList(pins, from, to) {
