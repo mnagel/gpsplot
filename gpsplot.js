@@ -105,6 +105,9 @@ function reverse_geocode(latlon) {
 }
 
 function gpsplot_debug_map(leafletevent) {
+    console.log("reverse geocoding is disabled");
+    return false;
+        
     var geocode = reverse_geocode(leafletevent.latlng);
     geocode = JSON.parse(geocode)
     console.log(geocode);
