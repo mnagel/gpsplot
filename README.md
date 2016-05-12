@@ -19,7 +19,7 @@ Screenshot
 
 ![gpsplot screenshot](doc/gpsplot.png?raw=true "gpsplot screenshot")
 
-Photography: (c) Dietmar Rabich, [rabich.de](rabich.de), CC BY-SA 4.0, Wikimedia Commons.
+Photography: (c) Dietmar Rabich, [rabich.de](http://rabich.de), CC BY-SA 4.0, Wikimedia Commons.
 
 
 Features
@@ -52,7 +52,7 @@ You can run `bash doc/demo.sh` to download some pictures to run a demo.
 Usage
 =====
 
-* place all pictures you want to plot in `./data/img/`
+* place all pictures you want to plot in `./data/img/` or look at the `--inputdir $FOLDER` argument.
 * run the python program to create the html page: `python preproc.py`
 * open the resulting `index.html` in your browser
 
