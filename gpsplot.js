@@ -35,6 +35,7 @@ var baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
   maxZoom: 19,
   attribution: '<a href="https://github.com/mnagel/gpsplot">GPSplot: "Your pictures and their origin."</a> | ' +
   '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  + ' | Photography © <a href="http://rabich.de">Dietmar Rabich</a> <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA</a>'
 });
 
 var cfg = {
