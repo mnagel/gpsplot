@@ -10,7 +10,7 @@ Display on a map where your photos were taken.
 Live Demo
 =========
 
-A live demo can be found at [http://gpsplot-demo.lettink.de/](http://gpsplot-demo.lettink.de/)
+A live demo can be found at [https://mnagel.github.io/gpsplot/](https://mnagel.github.io/gpsplot/)
 
 
 
