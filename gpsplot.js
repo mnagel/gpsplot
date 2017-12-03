@@ -341,16 +341,16 @@ function TrailElement(ts, lat, lon, comment) {
 
 function heuristic_gps_magic(dto, pin, trail) {
   if (dto.gps) {
-    console.log("using real gps data");
-    pin.tag += " EMBEDDED GPS";
+    console.log(pin.url +  ": using real gps data");
+    pin.tag += " EMBEDDED-GPS";
     pin.lat = dto.gps.lat;
     pin.lon = dto.gps.lon;
     heuristic_last_good_lat = pin.lat;
     heuristic_last_good_lon = pin.lon;
   }
   else if (dto.dotfileinfo && dto.dotfileinfo.gps) {
-    console.log("using dotfile gps data");
-    pin.tag += " DOTFILE GPS";
+    console.log(pin.url +  ": using dotfile gps data");
+    pin.tag += " DOTFILE-GPS";
     pin.lat = dto.dotfileinfo.gps.lat;
     pin.lon = dto.dotfileinfo.gps.lon;
     heuristic_last_good_lat = pin.lat;
@@ -358,12 +358,13 @@ function heuristic_gps_magic(dto, pin, trail) {
   }
   else if (typeof pin.date === "undefined") {
     // place pictures with no usable timestamp in the ocean
-    console.log("using hardcoded fallback");
+    console.log(pin.url +  ": using hardcoded fallback");
+    pin.tag += " NO-GPS NO-EXIF";
     pin.lat = 0;
     pin.lon = 65;
   }
   else if (trail.length > 0) {
-    console.log("using time correlated gps data");
+    console.log(pin.url +  ": using time correlated gps data");
     const arrayLength = trail.length;
     let bestTrailElement = trail[0];
     // TODO: this is basically len(trail)*len(pins) and could possibly benefit from sorting or other optimization
@@ -375,7 +376,7 @@ function heuristic_gps_magic(dto, pin, trail) {
         bestTrailElement = trail[i];
       }
     }
-    pin.tag += " TRAIL-HEURISTIC GPS based on Trail " + bestTrailElement.comment + " at " + safeDateFormat(bestTrailElement.ts);
+    pin.tag += " TRAIL-HEURISTIC-GPS Trail " + bestTrailElement.comment + " ts " + safeDateFormat(bestTrailElement.ts);
     // prevent clusters from being inseparable
     const clusterfuzzer = 0; // pin.pindex / 5000000;
     pin.lat = bestTrailElement.lat + clusterfuzzer;
@@ -384,8 +385,8 @@ function heuristic_gps_magic(dto, pin, trail) {
     heuristic_last_good_lon = pin.lon;
   }
   else {
-    console.log("using previous gps data");
-    pin.tag += " REPEATER-HEURISTIC GPS";
+    console.log(pin.url +  ": using previous gps data");
+    pin.tag += " REPEATER-HEURISTIC-GPS";
     pin.lat = heuristic_last_good_lat;
     pin.lon = heuristic_last_good_lon;
   }
