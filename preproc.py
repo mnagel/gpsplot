@@ -31,8 +31,6 @@ import os
 import re
 import shutil
 import sys
-import traceback
-
 
 def read_arguments(args):
     os.environ['COLUMNS'] = str(shutil.get_terminal_size().columns)
@@ -336,12 +334,18 @@ def main(options):
             # noinspection PyBroadException
             try:
                 exif_image = ExifImage(imagepath, options.referencethumbs)
-                if not exif_image.has_gps(showatzero=options.showatzero):
-                        logging.warning("Image %s has no EXIF and/or GPS data", exif_image.fn)
+
+                if exif_image.has_exif():
+                    if not exif_image.has_gps(showatzero=options.showatzero):
+                        logging.warning("Image %s has no GPS data in EXIF.", exif_image.fn)
                         stat_nogps += 1
 
-                if not exif_image.has_date():
-                    logging.warning("Image %s uses fake timestamp data", exif_image.fn)
+                    if not exif_image.has_date():
+                        logging.warning("Image %s has no TIME data in EXIF.", exif_image.fn)
+
+                else:
+                    logging.warning("Image %s has no EXIF data attached.", exif_image.fn)
+                    stat_nogps += 1
 
                 dto = exif_image_to_dto(exif_image, options.thumbdir)
                 dtos.append(dto)
