@@ -21,16 +21,18 @@
 from __future__ import print_function
 
 import argparse
-from datetime import datetime
 import errno
 import hashlib
-from PIL import Image, ExifTags
 import json
 import logging
 import os
 import re
 import shutil
 import sys
+from datetime import datetime
+
+from PIL import Image, ExifTags
+
 
 def read_arguments(args):
     os.environ['COLUMNS'] = str(shutil.get_terminal_size().columns)
@@ -105,6 +107,8 @@ def coord_pair(gps):
     if gps[LONGREF] == 'W':
         lon = -lon
     return lat, lon
+
+
 # end http://www.leancrew.com/all-this/2014/02/photo-locations-with-apple-maps/
 
 
@@ -372,6 +376,7 @@ def main(options):
     fill_template(outfile=options.outfile, dtos=dtos)
 
     logging.info("Preprocessing done, open file://%s" % os.path.abspath(options.outfile + "/../../index.html"))
+
 
 if __name__ == '__main__':
     myoptions = read_arguments(sys.argv[1:])
