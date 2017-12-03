@@ -86,6 +86,7 @@ function scaleIntoBox(x, y, boxsize) {
 // this method is called when right-clicking a thumbnail and exists for q&d debugging purposes...
 let global_allpins = "not_yet_debugging";
 
+// noinspection JSUnusedGlobalSymbols
 function gpsplot_debug_thumbnail(pindex) {
   console.log(global_allpins[pindex]);
   return false; // do not show real popup
@@ -108,8 +109,9 @@ function gpsplot_debug_map(leafletevent) {
   console.log("reverse geocoding is disabled");
   return false;
 
+  // noinspection UnreachableCodeJS
   let geocode = reverse_geocode(leafletevent.latlng);
-  geocode = JSON.parse(geocode)
+  geocode = JSON.parse(geocode);
   console.log(geocode);
 
   const strink = `
@@ -126,21 +128,23 @@ function gpsplot_debug_map(leafletevent) {
 
   const popup = L.popup();
   popup.setLatLng(leafletevent.latlng).setContent(strink).openOn(map);
-  return;
 }
 
-global_trailstring = "";
-global_traillatlon = "";
-global_traildate = new Date();
+let global_trailstring = "";
+let global_traillatlon = "";
+let global_traildate = new Date();
 
 function addToTrail() {
+  // noinspection JSJQueryEfficiency
   global_trailstring = global_trailstring + 'new TrailElement(new Date("' + $('#date_jit').val() + ':00"), ' +
     global_traillatlon.lat + ', ' + global_traillatlon.lng + ', "' + $('#date_cmt').val() + '"), <br/>';
   $('#trailresult').html(global_trailstring);
+  // noinspection JSJQueryEfficiency
   global_traildate = $('#date_jit').val();
 }
 
 
+// noinspection JSUnusedGlobalSymbols
 function gpsplot_debug_map_trail(leafletevent) {
   const control = document.createElement("div");
   control.innerHTML = `
@@ -152,7 +156,7 @@ function gpsplot_debug_map_trail(leafletevent) {
         Your Trail is:
         <br />
         <div id="trailresult"></div>
-    `
+    `;
 
   const popup = L.popup();
   global_traillatlon = leafletevent.latlng;
@@ -196,7 +200,7 @@ function Thumbnail(height, width, url, caption, pindex) {
     );
     const thumbnail = document.createElement("img");
     box.appendChild(thumbnail);
-    const sizes = scaleIntoBox(this.height, this.width, THUMBSIZE);
+    const sizes = scaleIntoBox(this.width, this.height, THUMBSIZE);
     thumbnail.setAttribute('src', this.url);
     thumbnail.setAttribute('class', 'noselect');
     thumbnail.setAttribute('style',
@@ -242,7 +246,7 @@ function Pin(lat, lon, aux, pindex) {
 
 function compareMarkers(a, b) {
   // TODO check consistency for both undefined
-  if (a.pin.date == b.pin.date) {
+  if (a.pin.date === b.pin.date) {
     return 0;
   }
   if (!a.pin.date) {
@@ -373,8 +377,7 @@ function heuristic_gps_magic(dto, pin, trail) {
     }
     pin.tag += " TRAIL-HEURISTIC GPS based on Trail " + bestTrailElement.comment + " at " + safeDateFormat(bestTrailElement.ts);
     // prevent clusters from being inseparable
-    let clusterfuzzer = pin.pindex / 5000000;
-    clusterfuzzer = 0;
+    const clusterfuzzer = 0; // pin.pindex / 5000000;
     pin.lat = bestTrailElement.lat + clusterfuzzer;
     pin.lon = bestTrailElement.lon + clusterfuzzer;
     heuristic_last_good_lat = pin.lat;
@@ -403,7 +406,7 @@ function get_thumbnail_caption(pin) {
   return tag_to_icon(pin.tag) + ' ' + (pin.date ? safeDateFormat(pin.date) : (pin.comment ? pin.comment : '&nbsp;'));
 }
 
-function dto_to_pin(dto, pindex, alldtos) {
+function dto_to_pin(dto, pindex) {
   const datevalue = dto.timestamp ? new Date(dto.timestamp) : undefined;
   const comment = dto.comment;
 
@@ -416,7 +419,7 @@ function dto_to_pin(dto, pindex, alldtos) {
   };
   const pin = new Pin(0, 0, aux, pindex);
   heuristic_gps_magic(dto, pin, typeof trail !== 'undefined' ? trail : []);
-  const thumbnail = dto.thumbnail ?
+  pin.thumbnail = dto.thumbnail ?
     new Thumbnail(
       // TODO this is senseless mixing of image/thumb
       dto.image ? dto.image.height : 80,
@@ -425,7 +428,6 @@ function dto_to_pin(dto, pindex, alldtos) {
       get_thumbnail_caption(pin),
       pindex
     ) : undefined;
-  pin.thumbnail = thumbnail;
   return pin;
 }
 
@@ -546,12 +548,12 @@ function bucketTimeForDate(date) {
 
 function nextBucketTimeForDate(date) {
   if (date) {
-    if (date.getMonth() == 11) {
-      var result = new Date(date.getFullYear() + 1, 0, 1);
+    if (date.getMonth() === 11) {
+      const result = new Date(date.getFullYear() + 1, 0, 1);
       return result.getTime();
     }
     else {
-      var result = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+      const result = new Date(date.getFullYear(), date.getMonth() + 1, 1);
       return result.getTime();
     }
   }
@@ -583,7 +585,7 @@ function plot_histogram(container, buckets) {
       continue;
     }
     const firstPinDate = buckets[bucketId][0].pin.date;
-    var x = bucketTimeForDate(firstPinDate);
+    const x = bucketTimeForDate(firstPinDate);
     const y = buckets[bucketId].length;
     d1.push([x, y]);
   }
@@ -611,6 +613,7 @@ function plot_histogram(container, buckets) {
       relative: true,
       position: 'ne',
       trackFormatter: function (obj) {
+        // noinspection JSSuspiciousNameCombination
         return bucketIdForTime(obj.x) + ': ' + Math.floor(obj.y).toString() + ' pictures';
       }
     },
