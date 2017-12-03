@@ -21,11 +21,11 @@ var options = {
 };
 
 $("#expandable").hover(
-  function() {
-   $(this).stop().animate({"height":"300px"}, 200).addClass("dropped");
+  function () {
+    $(this).stop().animate({"height": "300px"}, 200).addClass("dropped");
   },
-  function() {
-    $(this).stop().animate({"height":"20px"}, 200).removeClass("dropped");
+  function () {
+    $(this).stop().animate({"height": "20px"}, 200).removeClass("dropped");
   }
 );
 
@@ -80,39 +80,39 @@ L.control.scale({maxWidth: 400}).addTo(map);
 function scaleIntoBox(x, y, boxsize) {
   var scale = boxsize / Math.max(x, y);
   scale = Math.min(scale, 1); // dont go > 1 (dont enlarge)
-  return [x*scale, y*scale];
+  return [x * scale, y * scale];
 }
 
 // this method is called when right-clicking a thumbnail and exists for q&d debugging purposes...
 var global_allpins = "not_yet_debugging";
+
 function gpsplot_debug_thumbnail(pindex) {
-    console.log(global_allpins[pindex]);
-    return false; // do not show real popup
+  console.log(global_allpins[pindex]);
+  return false; // do not show real popup
 }
 
-function http_get(url)
-{
-    var req = new XMLHttpRequest();
-    // false for synchronous request
-    req.open("GET", url, false);
-    req.send(null);
-    return req.responseText;
+function http_get(url) {
+  var req = new XMLHttpRequest();
+  // false for synchronous request
+  req.open("GET", url, false);
+  req.send(null);
+  return req.responseText;
 }
 
 function reverse_geocode(latlon) {
-    var req = ` http://nominatim.openstreetmap.org/reverse?format=json&lat=${latlon.lat}&lon=${latlon.lng}&zoom=18&addressdetails=1`
-    return http_get(req);
+  var req = ` http://nominatim.openstreetmap.org/reverse?format=json&lat=${latlon.lat}&lon=${latlon.lng}&zoom=18&addressdetails=1`
+  return http_get(req);
 }
 
 function gpsplot_debug_map(leafletevent) {
-    console.log("reverse geocoding is disabled");
-    return false;
-        
-    var geocode = reverse_geocode(leafletevent.latlng);
-    geocode = JSON.parse(geocode)
-    console.log(geocode);
+  console.log("reverse geocoding is disabled");
+  return false;
 
-    var strink = `
+  var geocode = reverse_geocode(leafletevent.latlng);
+  geocode = JSON.parse(geocode)
+  console.log(geocode);
+
+  var strink = `
 <pre>
 {
   "gps" : {
@@ -124,9 +124,9 @@ function gpsplot_debug_map(leafletevent) {
 </pre>
     `
 
-    var popup = L.popup();
-    popup.setLatLng(leafletevent.latlng).setContent(strink).openOn(map);
-    return;
+  var popup = L.popup();
+  popup.setLatLng(leafletevent.latlng).setContent(strink).openOn(map);
+  return;
 }
 
 global_trailstring = "";
@@ -134,16 +134,16 @@ global_traillatlon = "";
 global_traildate = new Date();
 
 function addToTrail() {
-    global_trailstring = global_trailstring + 'new TrailElement(new Date("' + $('#date_jit').val() + ':00"), ' +
-        global_traillatlon.lat + ', ' + global_traillatlon.lng + ', "' + $('#date_cmt').val() + '"), <br/>';
-    $('#trailresult').html (global_trailstring);
-    global_traildate = $('#date_jit').val();
+  global_trailstring = global_trailstring + 'new TrailElement(new Date("' + $('#date_jit').val() + ':00"), ' +
+    global_traillatlon.lat + ', ' + global_traillatlon.lng + ', "' + $('#date_cmt').val() + '"), <br/>';
+  $('#trailresult').html(global_trailstring);
+  global_traildate = $('#date_jit').val();
 }
 
 
 function gpsplot_debug_map_trail(leafletevent) {
-    var control = document.createElement("div");
-    control.innerHTML = `
+  var control = document.createElement("div");
+  control.innerHTML = `
         <h2>Create Your Own Trail</h2>
         <input type="text" id="date_jit" value="">
         <input type="button" id="btn_generate" value="Pick A Date">
@@ -154,24 +154,24 @@ function gpsplot_debug_map_trail(leafletevent) {
         <div id="trailresult"></div>
     `
 
-    var popup = L.popup();
-    global_traillatlon = leafletevent.latlng;
-    popup.setLatLng(leafletevent.latlng).setContent(control).openOn(map);
+  var popup = L.popup();
+  global_traillatlon = leafletevent.latlng;
+  popup.setLatLng(leafletevent.latlng).setContent(control).openOn(map);
 
-    $('#btn_generate').click(function(){
-        $('#date_jit').appendDtpicker({
-            "onInit": function(handler){
-                handler.setDate(global_traildate);
-                handler.show();
-            },
-            "onHide": function(handler){
-                global_traildate = handler.getDate();
-                handler.destroy();
-            },
-            "dateFormat": "yyyy-MM-DDThh:mm",
-            "current": global_traildate
-        });
+  $('#btn_generate').click(function () {
+    $('#date_jit').appendDtpicker({
+      "onInit": function (handler) {
+        handler.setDate(global_traildate);
+        handler.show();
+      },
+      "onHide": function (handler) {
+        global_traildate = handler.getDate();
+        handler.destroy();
+      },
+      "dateFormat": "yyyy-MM-DDThh:mm",
+      "current": global_traildate
     });
+  });
 }
 
 function Thumbnail(height, width, url, caption, pindex) {
@@ -180,12 +180,12 @@ function Thumbnail(height, width, url, caption, pindex) {
   this.url = url;
   this.caption = caption;
 
-  this.createElement = function() {
+  this.createElement = function () {
     var box = document.createElement("div");
     // inject some code to aide debugging
-    box.setAttribute('oncontextmenu', "javascript:return gpsplot_debug_thumbnail(" + pindex +");");
+    box.setAttribute('oncontextmenu', "javascript:return gpsplot_debug_thumbnail(" + pindex + ");");
     box.setAttribute('style',
-         'width: ' + THUMBSIZE + 'px;'
+      'width: ' + THUMBSIZE + 'px;'
       + ' height: ' + THUMBSIZE + 'px;'
       + ' position: relative;'
       + ' display: inline-block;'
@@ -200,7 +200,7 @@ function Thumbnail(height, width, url, caption, pindex) {
     thumbnail.setAttribute('src', this.url);
     thumbnail.setAttribute('class', 'noselect');
     thumbnail.setAttribute('style',
-         'max-height: 100%;'
+      'max-height: 100%;'
       + ' max-width: 100%;'
       + ' width: auto;'
       + ' height: auto;'
@@ -215,7 +215,7 @@ function Thumbnail(height, width, url, caption, pindex) {
     box.appendChild(caption);
     caption.innerHTML = this.caption;
     caption.setAttribute('style',
-         'position: absolute;'
+      'position: absolute;'
       + ' bottom: 0;'
       + ' left: 0;'
       + ' right: 0;'
@@ -261,7 +261,7 @@ function onClusterClick(e) {
     markers = e.layer.getAllChildMarkers();
   }
   else if (e.type === "click") {
-    markers = [ e.target ];
+    markers = [e.target];
   }
   else {
     console.log("clicked on an unrecognized entity");
@@ -272,7 +272,7 @@ function onClusterClick(e) {
 
   var box = document.createElement('div');
 
-  markers.forEach(function(marker){
+  markers.forEach(function (marker) {
     var link = document.createElement('a');
     link.setAttribute('href', marker.pin.url);
     link.setAttribute('target', '_blank');
@@ -329,78 +329,78 @@ var heuristic_last_good_lat = 0;
 var heuristic_last_good_lon = 0;
 
 function TrailElement(ts, lat, lon, comment) {
-    this.ts = ts;
-    this.lat = lat;
-    this.lon = lon;
-    this.comment = comment;
+  this.ts = ts;
+  this.lat = lat;
+  this.lon = lon;
+  this.comment = comment;
 }
 
 function heuristic_gps_magic(dto, pin, trail) {
-    if (dto.gps) {
-        console.log("using real gps data");
-        pin.tag += " EMBEDDED GPS";
-        pin.lat = dto.gps.lat;
-        pin.lon = dto.gps.lon;
-        heuristic_last_good_lat = pin.lat;
-        heuristic_last_good_lon = pin.lon;
+  if (dto.gps) {
+    console.log("using real gps data");
+    pin.tag += " EMBEDDED GPS";
+    pin.lat = dto.gps.lat;
+    pin.lon = dto.gps.lon;
+    heuristic_last_good_lat = pin.lat;
+    heuristic_last_good_lon = pin.lon;
+  }
+  else if (dto.dotfileinfo && dto.dotfileinfo.gps) {
+    console.log("using dotfile gps data");
+    pin.tag += " DOTFILE GPS";
+    pin.lat = dto.dotfileinfo.gps.lat;
+    pin.lon = dto.dotfileinfo.gps.lon;
+    heuristic_last_good_lat = pin.lat;
+    heuristic_last_good_lon = pin.lon;
+  }
+  else if (typeof pin.date === "undefined") {
+    // place pictures with no usable timestamp in the ocean
+    console.log("using hardcoded fallback");
+    pin.lat = 0;
+    pin.lon = 65;
+  }
+  else if (trail.length > 0) {
+    console.log("using time correlated gps data");
+    var arrayLength = trail.length;
+    var bestTrailElement = trail[0];
+    // TODO: this is basically len(trail)*len(pins) and could possibly benefit from sorting or other optimization
+    for (var i = 0; i < arrayLength; i++) {
+      if (trail[i].ts > pin.date) {
+        break;
+      }
+      else {
+        bestTrailElement = trail[i];
+      }
     }
-    else if (dto.dotfileinfo && dto.dotfileinfo.gps) {
-        console.log("using dotfile gps data");
-        pin.tag += " DOTFILE GPS";
-        pin.lat = dto.dotfileinfo.gps.lat;
-        pin.lon = dto.dotfileinfo.gps.lon;
-        heuristic_last_good_lat = pin.lat;
-        heuristic_last_good_lon = pin.lon;
-    }
-    else if (typeof pin.date === "undefined") {
-        // place pictures with no usable timestamp in the ocean
-        console.log("using hardcoded fallback");
-        pin.lat = 0;
-        pin.lon = 65;
-    }
-    else if (trail.length > 0) {
-        console.log("using time correlated gps data");
-        var arrayLength = trail.length;
-        var bestTrailElement = trail[0];
-        // TODO: this is basically len(trail)*len(pins) and could possibly benefit from sorting or other optimization
-        for (var i = 0; i < arrayLength; i++) {
-            if (trail[i].ts > pin.date) {
-                break;
-            }
-            else {
-                bestTrailElement = trail[i];
-            }
-        }
-        pin.tag += " TRAIL-HEURISTIC GPS based on Trail " + bestTrailElement.comment + " at " + safeDateFormat(bestTrailElement.ts);
-        // prevent clusters from being inseparable
-        var clusterfuzzer = pin.pindex/5000000;
-        clusterfuzzer = 0;
-        pin.lat = bestTrailElement.lat + clusterfuzzer;
-        pin.lon = bestTrailElement.lon + clusterfuzzer;
-        heuristic_last_good_lat = pin.lat;
-        heuristic_last_good_lon = pin.lon;
-    }
-    else {
-        console.log("using previous gps data");
-        pin.tag += " REPEATER-HEURISTIC GPS";
-        pin.lat = heuristic_last_good_lat;
-        pin.lon = heuristic_last_good_lon;
-    }
+    pin.tag += " TRAIL-HEURISTIC GPS based on Trail " + bestTrailElement.comment + " at " + safeDateFormat(bestTrailElement.ts);
+    // prevent clusters from being inseparable
+    var clusterfuzzer = pin.pindex / 5000000;
+    clusterfuzzer = 0;
+    pin.lat = bestTrailElement.lat + clusterfuzzer;
+    pin.lon = bestTrailElement.lon + clusterfuzzer;
+    heuristic_last_good_lat = pin.lat;
+    heuristic_last_good_lon = pin.lon;
+  }
+  else {
+    console.log("using previous gps data");
+    pin.tag += " REPEATER-HEURISTIC GPS";
+    pin.lat = heuristic_last_good_lat;
+    pin.lon = heuristic_last_good_lon;
+  }
 }
 
 function tag_to_icon(tag) {
-    if (/.*EMBEDDED.*/.test(tag)) {
-        return '&#x2600;';
-    }
-    if (/.*DOTFILE.*/.test(tag)) {
-        return '&#x270e;';
-    }
+  if (/.*EMBEDDED.*/.test(tag)) {
+    return '&#x2600;';
+  }
+  if (/.*DOTFILE.*/.test(tag)) {
+    return '&#x270e;';
+  }
 
-    return '&#x2718;';
+  return '&#x2718;';
 }
 
 function get_thumbnail_caption(pin) {
-    return tag_to_icon(pin.tag) + ' ' + (pin.date ? safeDateFormat(pin.date) : (pin.comment ? pin.comment : '&nbsp;'));
+  return tag_to_icon(pin.tag) + ' ' + (pin.date ? safeDateFormat(pin.date) : (pin.comment ? pin.comment : '&nbsp;'));
 }
 
 function dto_to_pin(dto, pindex, alldtos) {
@@ -413,34 +413,34 @@ function dto_to_pin(dto, pindex, alldtos) {
     url: dto.url ? dto.url : (dto.image ? dto.image.url : undefined),
     exifrotation: dto.image ? dto.image.rotation : undefined,
     dotfileinfo: dto.dotfileinfo
-    };
+  };
   var pin = new Pin(0, 0, aux, pindex);
   heuristic_gps_magic(dto, pin, typeof trail !== 'undefined' ? trail : []);
   var thumbnail = dto.thumbnail ?
-                    new Thumbnail(
-                      // TODO this is senseless mixing of image/thumb
-                      dto.image ? dto.image.height : 80,
-                      dto.image ? dto.image.width : 80,
-                      (dto.thumbnail && dto.image) ? (dto.thumbnail.url + '?imagePath=' + dto.image.url) : (dto.thumbnail ? dto.thumbnail.url : undefined),
-                      get_thumbnail_caption(pin),
-                      pindex
-                    ) : undefined;
+    new Thumbnail(
+      // TODO this is senseless mixing of image/thumb
+      dto.image ? dto.image.height : 80,
+      dto.image ? dto.image.width : 80,
+      (dto.thumbnail && dto.image) ? (dto.thumbnail.url + '?imagePath=' + dto.image.url) : (dto.thumbnail ? dto.thumbnail.url : undefined),
+      get_thumbnail_caption(pin),
+      pindex
+    ) : undefined;
   pin.thumbnail = thumbnail;
   return pin;
 }
 
 // TODO *cry for help* global state hack
 // add empty group so that lateron a remove works unchecked
-var markerClusterGroup = L.markerClusterGroup({ });
+var markerClusterGroup = L.markerClusterGroup({});
 
 // TODO move *lots* of stuff here...
 function init(pin_dtos) {
   // register the handler for clicking the histogram
-  Flotr.EventAdapter.observe(document.getElementById("histogram"), 'flotr:select', function(area){
+  Flotr.EventAdapter.observe(document.getElementById("histogram"), 'flotr:select', function (area) {
     var start = new Date(parseInt(area.x1, 10));
-    start = new Date( bucketTimeForDate(start) ); // beginning of month
+    start = new Date(bucketTimeForDate(start)); // beginning of month
     var end = new Date(parseInt(area.x2, 10));
-    end = new Date( nextBucketTimeForDate(end) ); // beginning of next month
+    end = new Date(nextBucketTimeForDate(end)); // beginning of next month
     main(pin_dtos, start, end);
   });
 
@@ -458,64 +458,64 @@ function markerClusterIconCreate(cluster) {
   var outerRadius = innerRadius + outerOffset;
   var outerSize = 2 * outerRadius;
 
-  return new L.DivIcon( {
-    html :  ' <div class="" style="box-sizing: initial;'
-          + ' width: ' + innerSize + 'px;'
-          + ' height: ' + innerSize + 'px;'
-          + ' background-clip: padding-box;'
-          + ' padding: 5px;'
-          + ' border-radius: ' + outerRadius + 'px;'
-          + ' background-color: hsla(' + redToGreen + ', 100%, 50%, 0.8);">'
+  return new L.DivIcon({
+    html: ' <div class="" style="box-sizing: initial;'
+    + ' width: ' + innerSize + 'px;'
+    + ' height: ' + innerSize + 'px;'
+    + ' background-clip: padding-box;'
+    + ' padding: 5px;'
+    + ' border-radius: ' + outerRadius + 'px;'
+    + ' background-color: hsla(' + redToGreen + ', 100%, 50%, 0.8);">'
 
-          + ' <div class="" style="box-sizing: initial;'
-          + ' font: 12px Helvetica Neue, Arial, Helvetica, sans-serif;'
-          + ' text-align: center;'
-          + ' width: ' + innerSize + 'px;'
-          + ' height: ' + innerSize + 'px;'
-          + ' border-radius: ' + innerRadius + 'px;'
-          + ' background-color: rgba(255, 255, 255, 0.7);">'
-          + ' <span style="line-height: ' + innerSize + 'px;">' + childCount + '</span>'
-          + '</div></div>',
-    className : '',
-    iconSize : new L.Point(outerSize, outerSize)
-  } );
+    + ' <div class="" style="box-sizing: initial;'
+    + ' font: 12px Helvetica Neue, Arial, Helvetica, sans-serif;'
+    + ' text-align: center;'
+    + ' width: ' + innerSize + 'px;'
+    + ' height: ' + innerSize + 'px;'
+    + ' border-radius: ' + innerRadius + 'px;'
+    + ' background-color: rgba(255, 255, 255, 0.7);">'
+    + ' <span style="line-height: ' + innerSize + 'px;">' + childCount + '</span>'
+    + '</div></div>',
+    className: '',
+    iconSize: new L.Point(outerSize, outerSize)
+  });
 }
 
 function main(pin_dtos, from, to) {
-    map.removeLayer(markerClusterGroup);
+  map.removeLayer(markerClusterGroup);
 
-    var pins = pin_dtos.map(dto_to_pin);
-    if ((typeof from !== "undefined") && (typeof to !== "undefined")) {
-      pins = filterPinList(pins, from, to);
-    }
-    console.log("should see " + pins.length + " pins now");
-    var listOfMarkers = [];
-    markerClusterGroup = L.markerClusterGroup({
-      zoomToBoundsOnClick: false,
-      spiderfyOnMaxZoom: false,
-      singleMarkerMode: true,
-      iconCreateFunction: markerClusterIconCreate
-    });
-    pins.forEach(function(pin) {
-      var result = plotToLayer(pin, markerClusterGroup, listOfMarkers);
-      listOfMarkers.push(result);
-    });
-    markerClusterGroup.on('clusterclick', onClusterClick);
-    map.addLayer(markerClusterGroup);
-    map.fitBounds(markerClusterGroup.getBounds().pad(0.5));
+  var pins = pin_dtos.map(dto_to_pin);
+  if ((typeof from !== "undefined") && (typeof to !== "undefined")) {
+    pins = filterPinList(pins, from, to);
+  }
+  console.log("should see " + pins.length + " pins now");
+  var listOfMarkers = [];
+  markerClusterGroup = L.markerClusterGroup({
+    zoomToBoundsOnClick: false,
+    spiderfyOnMaxZoom: false,
+    singleMarkerMode: true,
+    iconCreateFunction: markerClusterIconCreate
+  });
+  pins.forEach(function (pin) {
+    var result = plotToLayer(pin, markerClusterGroup, listOfMarkers);
+    listOfMarkers.push(result);
+  });
+  markerClusterGroup.on('clusterclick', onClusterClick);
+  map.addLayer(markerClusterGroup);
+  map.fitBounds(markerClusterGroup.getBounds().pad(0.5));
 
-    var buckets = calculateTimeBuckets(listOfMarkers);
-    console.log(document.getElementById("histogram"));
-    plot_histogram(document.getElementById("histogram"), buckets);
+  var buckets = calculateTimeBuckets(listOfMarkers);
+  console.log(document.getElementById("histogram"));
+  plot_histogram(document.getElementById("histogram"), buckets);
 
-    global_allpins = pins;
-    heatmapLayer.setData({data: pins});
+  global_allpins = pins;
+  heatmapLayer.setData({data: pins});
 
-    map.on('click', gpsplot_debug_map);
+  map.on('click', gpsplot_debug_map);
 }
 
 function filterPinList(pins, from, to) {
-  pins = pins.filter(function(elem) {
+  pins = pins.filter(function (elem) {
     return (from <= elem.date) && (to > elem.date);
   });
   console.log("filtering from " + from.format('Y-m-d') + " to " + to.format('Y-m-d'));
@@ -562,10 +562,10 @@ function calculateTimeBuckets(markers) {
   // dict with: BucketnameId => Marker[]
   var buckets = {};
 
-  markers.forEach(function(marker) {
+  markers.forEach(function (marker) {
     var myBucket = bucketIdForDate(marker.pin.date);
-    if(!(myBucket in buckets)) {
-        buckets[myBucket] = [];
+    if (!(myBucket in buckets)) {
+      buckets[myBucket] = [];
     }
     buckets[myBucket].push(marker);
   });
@@ -588,47 +588,49 @@ function plot_histogram(container, buckets) {
   }
 
   options = {
-    xaxis : {
-      mode : "time",
-      labelsAngle : 0,
-      tickFormatter : function(x) {
-        if(isNaN(x)) {
+    xaxis: {
+      mode: "time",
+      labelsAngle: 0,
+      tickFormatter: function (x) {
+        if (isNaN(x)) {
           return "";
         } else {
           return bucketIdForTime(x);
         }
       }
     },
-    yaxis : {
-      min : 0,
-      tickFormatter : function(x) {
+    yaxis: {
+      min: 0,
+      tickFormatter: function (x) {
         return Math.floor(x).toString();
       }
     },
-    mouse : {
-      track : true,
-      relative : true,
-      position : 'ne',
-      trackFormatter : function(obj){ return bucketIdForTime(obj.x) +': ' + Math.floor(obj.y).toString() + ' pictures'; }
+    mouse: {
+      track: true,
+      relative: true,
+      position: 'ne',
+      trackFormatter: function (obj) {
+        return bucketIdForTime(obj.x) + ': ' + Math.floor(obj.y).toString() + ' pictures';
+      }
     },
-    bars : {
-      show : true,
-      horizontal : false,
-      shadowSize : 0,
+    bars: {
+      show: true,
+      horizontal: false,
+      shadowSize: 0,
       // TODO this encodes info about the bucket width. refactor.
-      barWidth : 1000 /* ms->second */ * 60 * 60 * 24 /* second->day */ * 27 /* day->nearly a month */
+      barWidth: 1000 /* ms->second */ * 60 * 60 * 24 /* second->day */ * 27 /* day->nearly a month */
     },
-    selection : {
-      mode : 'x'
+    selection: {
+      mode: 'x'
     },
-    HtmlText : false,
+    HtmlText: false,
     // TODO more bucket width knowledge
-    title : 'Pictures per Month (' + bucketIdForTime(d1[0][0]) + ' until ' + bucketIdForTime(d1[d1.length-1][0]) +  ', click to reset filter)'
+    title: 'Pictures per Month (' + bucketIdForTime(d1[0][0]) + ' until ' + bucketIdForTime(d1[d1.length - 1][0]) + ', click to reset filter)'
   };
 
   Flotr.draw(
     container,
-    [ d1 ],
+    [d1],
     options
   );
 }
