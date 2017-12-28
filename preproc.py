@@ -325,7 +325,6 @@ def mkdir_p(path):
 def main(options):
     if options.generatethumbs:
         mkdir_p(options.thumbdir)
-
     dtos = []
 
     logging.info("Processing image folder: %s" % options.inputdir)
@@ -337,31 +336,31 @@ def main(options):
     logging.info("There are %d images to process", len(imagepaths))
 
     try:
-        for imagepath in imagepaths:
+        for index, imagepath in enumerate(imagepaths):
             # noinspection PyBroadException
             try:
                 exif_image = ExifImage(imagepath, options.referencethumbs)
 
                 if exif_image.has_exif():
                     if not exif_image.has_gps(showatzero=options.showatzero):
-                        logging.warning("Image %s has no GPS data in EXIF.", exif_image.fn)
+                        logging.warning("%d/%d Image %s has no GPS data in EXIF.", index, stat_input, exif_image.fn)
                         stat_nogps += 1
 
                     if not exif_image.has_date():
-                        logging.warning("Image %s has no TIME data in EXIF.", exif_image.fn)
+                        logging.warning("%d/%d Image %s has no TIME data in EXIF.", index, stat_input, exif_image.fn)
 
                 else:
-                    logging.warning("Image %s has no EXIF data attached.", exif_image.fn)
+                    logging.warning("%d/%d Image %s has no EXIF data attached.", index, stat_input, exif_image.fn)
                     stat_nogps += 1
 
                 dto = exif_image_to_dto(exif_image, options.thumbdir)
                 dtos.append(dto)
                 stat_output += 1
-                logging.debug("Added image %s" % exif_image.fn)
+                logging.debug("%d/%d Added image %s", index, stat_input, exif_image.fn)
                 if options.generatethumbs:
                     exif_image.create_thumbnail(options.thumbdir, options.thumbsize)
             except Exception:
-                logging.exception("Single picture exception on %s" % imagepath)
+                logging.exception("%d/%d Single picture exception on %s", index, stat_input, imagepath)
                 stat_exceptions += 1
     except KeyboardInterrupt:
         # we stop the image processing, but still continue with the program.
