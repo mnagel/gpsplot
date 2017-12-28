@@ -19,6 +19,7 @@
 const options = {
   'useLightbox': true,
   'useReverseGeoCoding': false,
+  'useTrailFile': true,
 };
 
 $("#expandable").hover(
@@ -361,25 +362,25 @@ function heuristic_gps_magic(dto, pin, trail) {
     heuristic_last_good_lon = pin.lon;
   }
   else if (typeof pin.date === "undefined") {
+    // TODO fix for repeater-heuristic!?!
     // place pictures with no usable timestamp in the ocean
     console.log(pin.url +  ": using hardcoded fallback");
     pin.tag += " NO-GPS NO-EXIF";
     pin.lat = 0;
     pin.lon = 65;
   }
-  else if (trail.length > 0) {
+  else if (options.useTrailFile && trail.length > 0) {
     console.log(pin.url +  ": using time correlated gps data");
-    const arrayLength = trail.length;
-    let bestTrailElement = trail[0];
-    // TODO: this is basically len(trail)*len(pins) and could possibly benefit from sorting or other optimization
-    for (let i = 0; i < arrayLength; i++) {
-      if (trail[i].ts > pin.date) {
-        break;
-      }
-      else {
-        bestTrailElement = trail[i];
-      }
-    }
+    let bestTrailElement = best_match(
+      trail,
+      function(te) {
+        return te.ts;
+	  },
+      pin.date,
+      0,
+      trail.length
+    );
+
     pin.tag += " TRAIL-HEURISTIC-GPS Trail " + bestTrailElement.comment + " ts " + safeDateFormat(bestTrailElement.ts);
     // prevent clusters from being inseparable
     const clusterfuzzer = 0; // pin.pindex / 5000000;
@@ -394,6 +395,21 @@ function heuristic_gps_magic(dto, pin, trail) {
     pin.lat = heuristic_last_good_lat;
     pin.lon = heuristic_last_good_lon;
   }
+}
+
+// find best match for target in array (must be sorted)
+function best_match(ary, extract, target, imin, imax) {
+    if (imin === imax) {
+      return ary[imin];
+    }
+
+    const pivot = Math.floor((imin + imax) / 2);
+
+    if (extract(ary[pivot]) > target) {
+      return best_match(ary, extract, target, imin, pivot);
+    } else {
+      return best_match(ary, extract, target, pivot+1, imax);
+    }
 }
 
 function tag_to_icon(tag) {
@@ -491,6 +507,16 @@ function markerClusterIconCreate(cluster) {
 
 function main(pin_dtos, from, to) {
   map.removeLayer(markerClusterGroup);
+
+  if (options.useTrailFile) {
+    console.log("sorting trail file");
+
+    trail.sort(function (a, b) {
+        return a.ts - b.ts;
+    });
+
+    console.log("trail file is now sorted");
+  }
 
   let pins = pin_dtos.map(dto_to_pin);
   if ((typeof from !== "undefined") && (typeof to !== "undefined")) {
