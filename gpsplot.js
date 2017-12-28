@@ -16,8 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-let options = {
+const options = {
   'useLightbox': true,
+  'useReverseGeoCoding': false,
 };
 
 $("#expandable").hover(
@@ -83,9 +84,9 @@ function scaleIntoBox(x, y, boxsize) {
   return [x * scale, y * scale];
 }
 
-// this method is called when right-clicking a thumbnail and exists for q&d debugging purposes...
 let global_allpins = "not_yet_debugging";
 
+// this method is called when right-clicking a thumbnail and exists for q&d debugging purposes...
 // noinspection JSUnusedGlobalSymbols
 function gpsplot_debug_thumbnail(pindex) {
   console.log(global_allpins[pindex]);
@@ -106,8 +107,10 @@ function reverse_geocode(latlon) {
 }
 
 function gpsplot_debug_map(leafletevent) {
-  console.log("reverse geocoding is disabled");
-  return false;
+  if (!options.useReverseGeoCoding) {
+	  console.log("reverse geocoding is disabled");
+	  return false;
+  }
 
   // noinspection UnreachableCodeJS
   let geocode = reverse_geocode(leafletevent.latlng);
@@ -304,6 +307,7 @@ function onClusterClick(e) {
     e.layer.bindPopup(box, {maxWidth: 520, maxHeight: 400}).openPopup();
   }
   else if (e.type === "click") {
+
     console.log("opening single image popup");
     // TODO why is this very strange construct necessary?
     if (!e.target.hasPopup) {
@@ -429,6 +433,7 @@ function dto_to_pin(dto, pindex) {
       get_thumbnail_caption(pin),
       pindex
     ) : undefined;
+  pin.__filetrace = dto;
   return pin;
 }
 

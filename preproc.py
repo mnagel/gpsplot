@@ -29,6 +29,7 @@ import os
 import re
 import shutil
 import sys
+import webbrowser
 from datetime import datetime
 
 from PIL import Image, ExifTags
@@ -66,6 +67,7 @@ def read_arguments(args):
                         help='scan all files for exif data, do not restrict to jpeg files')
     parser.add_argument('--verbose', default=False, action="store_true",
                         help='show more log messages')
+    parser.add_argument('--open', default=False, action="store_true", help='open result in browser')
 
     options = parser.parse_args(args)
     return options
@@ -326,12 +328,13 @@ def main(options):
 
     dtos = []
 
+    logging.info("Processing image folder: %s" % options.inputdir)
     imagepaths = find_images(options.inputdir, allfileextensions=options.allfileextensions)
     stat_input = len(imagepaths)
     stat_output = 0
     stat_nogps = 0
     stat_exceptions = 0
-    logging.info("Processing list of %d images...", len(imagepaths))
+    logging.info("There are %d images to process", len(imagepaths))
 
     try:
         for imagepath in imagepaths:
@@ -375,7 +378,12 @@ def main(options):
 
     fill_template(outfile=options.outfile, dtos=dtos)
 
-    logging.info("Preprocessing done, open file://%s" % os.path.abspath(options.outfile + "/../../index.html"))
+    os_file = "file://" + os.path.realpath(options.outfile) + "/../../index.html"
+    if options.open:
+        logging.info("Preprocessing done, opening %s" % os_file)
+        webbrowser.open(os_file)
+    else:
+        logging.info("Preprocessing done, please open %s" % os_file)
 
 
 if __name__ == '__main__':
