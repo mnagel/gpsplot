@@ -10,7 +10,7 @@ import re
 import sys
 
 def read_arguments(args):
-    parser = argparse.ArgumentParser(prog='log2pin')
+    parser = argparse.ArgumentParser(prog='log2trail')
     parser.add_argument('--infile', default=None, type=str)
     parser.add_argument('--outfile', default=None, type=str)
 

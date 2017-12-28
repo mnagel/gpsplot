@@ -1,11 +1,11 @@
-log2pin
-=======
+log2trail
+=========
 
 Usage
 -----
 
 ```
-user@host:~/gpsplot$ python tools/log2pin.py --infile data/position-small.txt --outfile data/pins.js
+user@host:~/gpsplot$ python tools/log2trail.py --infile data/position-small.txt --outfile data/pins.js
 done. processed 5 entries
 ```
 
@@ -25,4 +25,4 @@ gps log file with contents like this:
 Output
 ------
 
-pins.js compatible json
+trails.js for gpsplot
