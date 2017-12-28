@@ -239,12 +239,14 @@ function Pin(lat, lon, aux, pindex) {
   this.lat = lat;
   this.lon = lon;
   this.tag = "";
-  this.date = aux.date;
-  this.comment = aux.comment;
-  this.url = aux.url;
-  this.rotation = aux.exifrotation;
-  this.thumbnail = aux.thumbnail;
-  this.dotfileinfo = aux.dotfileinfo;
+  if (aux !== null) {
+	  this.date = aux.date;
+	  this.comment = aux.comment;
+	  this.url = aux.url;
+	  this.rotation = aux.exifrotation;
+	  this.thumbnail = aux.thumbnail;
+	  this.dotfileinfo = aux.dotfileinfo;
+  }
   this.pindex = pindex;
 }
 
@@ -334,9 +336,6 @@ function plotToLayer(what, layer) {
   return marker;
 }
 
-let heuristic_last_good_lat = 0;
-let heuristic_last_good_lon = 0;
-
 function TrailElement(ts, lat, lon, comment) {
   this.ts = ts;
   this.lat = lat;
@@ -344,32 +343,20 @@ function TrailElement(ts, lat, lon, comment) {
   this.comment = comment;
 }
 
-function heuristic_gps_magic(dto, pin, trail) {
+function heuristic_gps_magic(dto, pin, trail, fallback_lat, fallback_lon) {
   if (dto.gps) {
     console.log(pin.url +  ": using real gps data");
     pin.tag += " EMBEDDED-GPS";
     pin.lat = dto.gps.lat;
     pin.lon = dto.gps.lon;
-    heuristic_last_good_lat = pin.lat;
-    heuristic_last_good_lon = pin.lon;
   }
   else if (dto.dotfileinfo && dto.dotfileinfo.gps) {
     console.log(pin.url +  ": using dotfile gps data");
     pin.tag += " DOTFILE-GPS";
     pin.lat = dto.dotfileinfo.gps.lat;
     pin.lon = dto.dotfileinfo.gps.lon;
-    heuristic_last_good_lat = pin.lat;
-    heuristic_last_good_lon = pin.lon;
   }
-  else if (typeof pin.date === "undefined") {
-    // TODO fix for repeater-heuristic!?!
-    // place pictures with no usable timestamp in the ocean
-    console.log(pin.url +  ": using hardcoded fallback");
-    pin.tag += " NO-GPS NO-EXIF";
-    pin.lat = 0;
-    pin.lon = 65;
-  }
-  else if (options.useTrailFile && trail.length > 0) {
+  else if (options.useTrailFile && trail.length > 0 && typeof pin.date !== "undefined") {
     console.log(pin.url +  ": using time correlated gps data");
     let bestTrailElement = best_match(
       trail,
@@ -386,14 +373,12 @@ function heuristic_gps_magic(dto, pin, trail) {
     const clusterfuzzer = 0; // pin.pindex / 5000000;
     pin.lat = bestTrailElement.lat + clusterfuzzer;
     pin.lon = bestTrailElement.lon + clusterfuzzer;
-    heuristic_last_good_lat = pin.lat;
-    heuristic_last_good_lon = pin.lon;
   }
   else {
     console.log(pin.url +  ": using previous gps data");
     pin.tag += " REPEATER-HEURISTIC-GPS";
-    pin.lat = heuristic_last_good_lat;
-    pin.lon = heuristic_last_good_lon;
+    pin.lat = fallback_lat;
+    pin.lon = fallback_lon;
   }
 }
 
@@ -427,6 +412,8 @@ function get_thumbnail_caption(pin) {
   return tag_to_icon(pin.tag) + ' ' + (pin.date ? safeDateFormat(pin.date) : (pin.comment ? pin.comment : '&nbsp;'));
 }
 
+let previous_pin = new Pin(65, 65, null, null);
+
 function dto_to_pin(dto, pindex) {
   const datevalue = dto.timestamp ? new Date(dto.timestamp) : undefined;
   const comment = dto.comment;
@@ -438,8 +425,9 @@ function dto_to_pin(dto, pindex) {
     exifrotation: dto.image ? dto.image.rotation : undefined,
     dotfileinfo: dto.dotfileinfo
   };
+
   const pin = new Pin(0, 0, aux, pindex);
-  heuristic_gps_magic(dto, pin, typeof trail !== 'undefined' ? trail : []);
+  heuristic_gps_magic(dto, pin, trail, previous_pin.lat, previous_pin.lon);
   pin.thumbnail = dto.thumbnail ?
     new Thumbnail(
       // TODO this is senseless mixing of image/thumb
@@ -450,6 +438,7 @@ function dto_to_pin(dto, pindex) {
       pindex
     ) : undefined;
   pin.__filetrace = dto;
+  previous_pin = pin;
   return pin;
 }
 
@@ -511,6 +500,7 @@ function main(pin_dtos, from, to) {
   if (options.useTrailFile) {
     console.log("sorting trail file");
 
+    trail = (typeof trail === 'undefined') ? [] : trail;
     trail.sort(function (a, b) {
         return a.ts - b.ts;
     });
