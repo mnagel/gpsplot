@@ -345,19 +345,19 @@ function TrailElement(ts, lat, lon, comment) {
 
 function heuristic_gps_magic(dto, pin, trail, fallback_lat, fallback_lon) {
   if (dto.gps) {
-    console.log(pin.url +  ": using real gps data");
+    //console.log(pin.url +  ": using real gps data");
     pin.tag += " EMBEDDED-GPS";
     pin.lat = dto.gps.lat;
     pin.lon = dto.gps.lon;
   }
   else if (dto.dotfileinfo && dto.dotfileinfo.gps) {
-    console.log(pin.url +  ": using dotfile gps data");
+    //console.log(pin.url +  ": using dotfile gps data");
     pin.tag += " DOTFILE-GPS";
     pin.lat = dto.dotfileinfo.gps.lat;
     pin.lon = dto.dotfileinfo.gps.lon;
   }
   else if (options.useTrailFile && trail.length > 0 && typeof pin.date !== "undefined") {
-    console.log(pin.url +  ": using time correlated gps data");
+    //console.log(pin.url +  ": using time correlated gps data");
     let bestTrailElement = best_match(
       trail,
       function(te) {
@@ -365,27 +365,39 @@ function heuristic_gps_magic(dto, pin, trail, fallback_lat, fallback_lon) {
 	  },
       pin.date,
       0,
-      trail.length
+      trail.length - 1
     );
 
     pin.tag += " TRAIL-HEURISTIC-GPS Trail " + bestTrailElement.comment + " ts " + safeDateFormat(bestTrailElement.ts);
     // prevent clusters from being inseparable
-    const clusterfuzzer = 0; // pin.pindex / 5000000;
-    pin.lat = bestTrailElement.lat + clusterfuzzer;
-    pin.lon = bestTrailElement.lon + clusterfuzzer;
+    const clusterfuzzer = 0.001; // pin.pindex / 5000000;
+    pin.lat = bestTrailElement.lat + clusterfuzzer * (Math.random() - 0.5);
+    pin.lon = bestTrailElement.lon + clusterfuzzer * (Math.random() - 0.5);
   }
   else {
-    console.log(pin.url +  ": using previous gps data");
+    //console.log(pin.url +  ": using previous gps data");
     pin.tag += " REPEATER-HEURISTIC-GPS";
     pin.lat = fallback_lat;
     pin.lon = fallback_lon;
   }
 }
 
-// find best match for target in array (must be sorted)
+/**
+ * find best match for target in array (must be sorted)
+ * @param ary       the array to look into
+ * @param extract   function to extract key from elements
+ * @param target    key to find/match
+ * @param imin      minimal allowed index. initially 0.
+ * @param imax      maximal allowed index. initially len-1
+ * @returns {*}     element with best key (maximal key not exceeding target)
+ */
 function best_match(ary, extract, target, imin, imax) {
-    if (imin === imax) {
-      return ary[imin];
+    if (imax - imin < 2) {
+      if (target < extract(ary[imax])) {
+        return ary[imin];
+      } else {
+        return ary[imax];
+      }
     }
 
     const pivot = Math.floor((imin + imax) / 2);
@@ -393,19 +405,25 @@ function best_match(ary, extract, target, imin, imax) {
     if (extract(ary[pivot]) > target) {
       return best_match(ary, extract, target, imin, pivot);
     } else {
-      return best_match(ary, extract, target, pivot+1, imax);
+      return best_match(ary, extract, target, pivot, imax);
     }
 }
 
 function tag_to_icon(tag) {
   if (/.*EMBEDDED.*/.test(tag)) {
-    return '&#x2600;';
+    return '<i class=\"fa fa-camera-retro\" aria-hidden=\"true\"></i>';
   }
   if (/.*DOTFILE.*/.test(tag)) {
-    return '&#x270e;';
+    return '<i class=\"fa fa-dot-circle-o\" aria-hidden=\"true\"></i>';
+  }
+  if (/.*TRAIL.*/.test(tag)) {
+    return '<i class=\"fa fa-calendar\" aria-hidden=\"true\"></i>';
+  }
+  if (/.*REPEATER.*/.test(tag)) {
+    return '<i class=\"fa fa-files-o\" aria-hidden=\"true\"></i>';
   }
 
-  return '&#x2718;';
+  return '<i class=\"fa exclamation-triangle\" aria-hidden=\"true\"></i>';
 }
 
 function get_thumbnail_caption(pin) {
@@ -413,6 +431,7 @@ function get_thumbnail_caption(pin) {
 }
 
 let previous_pin = new Pin(65, 65, null, null);
+previous_pin.comment = "repeater-heuristic not initialized";
 
 function dto_to_pin(dto, pindex) {
   const datevalue = dto.timestamp ? new Date(dto.timestamp) : undefined;
