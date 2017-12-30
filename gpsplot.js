@@ -343,6 +343,21 @@ function TrailElement(ts, lat, lon, comment) {
   this.comment = comment;
 }
 
+function hashCode(str){
+	let hash = 0;
+	if (str.length === 0) return hash;
+	for (i = 0; i < str.length; i++) {
+		char = str.charCodeAt(i);
+		hash = ((hash<<5)-hash)+char;
+		hash = hash & hash; // Convert to 32bit integer
+	}
+	return hash;
+}
+
+function parent_folder(file) {
+	return file.substring(0, file.lastIndexOf("/")+1);
+}
+
 function heuristic_gps_magic(dto, pin, trail, fallback_lat, fallback_lon) {
   if (dto.gps) {
     //console.log(pin.url +  ": using real gps data");
@@ -370,9 +385,12 @@ function heuristic_gps_magic(dto, pin, trail, fallback_lat, fallback_lon) {
 
     pin.tag += " TRAIL-HEURISTIC-GPS Trail " + bestTrailElement.comment + " ts " + safeDateFormat(bestTrailElement.ts);
     // prevent clusters from being inseparable
-    const clusterfuzzer = 0.001; // pin.pindex / 5000000;
-    pin.lat = bestTrailElement.lat + clusterfuzzer * (Math.random() - 0.5);
-    pin.lon = bestTrailElement.lon + clusterfuzzer * (Math.random() - 0.5);
+    const clusterSize = 0.001;
+    const rand1 = (hashCode(parent_folder(pin.url + "salt")) % 1000) / 1000;
+    const rand2 = (hashCode(parent_folder("salt" + pin.url + "b")) % 1000) / 1000;
+    // rand = (Math.random() - 0.5);
+    pin.lat = bestTrailElement.lat + clusterSize * rand1;
+    pin.lon = bestTrailElement.lon + clusterSize * rand2;
   }
   else {
     //console.log(pin.url +  ": using previous gps data");
